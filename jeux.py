@@ -1,50 +1,48 @@
 import dearpygui.dearpygui as dpg
 import os
 import keyboard
+from PIL import Image
+from pprint import pprint
 
 # Classes
 
-class labirinthe:
+class labirynthe:
     """
-    Classe définissant un labirinthe
+    Classe définissant un labirynthe
     """
     def __init__(self, taille_personnage: int, image, pos_depart: tuple):
         self.taille_personnage = taille_personnage
         self.pos_depart = pos_depart
         self.image = image
 
-class Niveau:
-    """
-    Classe définissant un niveau composé de plusieurs Labirinthe
-    """
-    def __init__(self, nom: str, labirinthes: dict):
-        self.nom = nom
-        self.labirinthes = labirinthes
 
 class Puzzle:
-    def __init__(self, image, nb_pieces):
+    def __init__(self, image):
         self.image_path = image
-        self.image_list = image_to_list(image)
-        self.nb_pieces = nb_pieces
-        self.pieces = []
+        #self.image_list = image_to_list()
 
-def puzzle_actuel(self):
-    pass
+    def puzzle_actuel(self):
+        pass
 
 # fonctions
 
-def image_to_list():
-    pass
+def image_to_list(image_path):
+
+    image_filepath = 'pixel_avatar.png'
+    myimage = Image.open(image_path)
+    width, height = myimage.size
+    return [composant for composant in myimage.getpixel((x, y)) for x in range(width) for y in range(height)]
 
 def main():
     x = 10
-
 
     dpg.create_context()
     dpg.create_viewport(title='Labirynthe', resizable=True, vsync=True, clear_color=(0, 0, 0))
     dpg.setup_dearpygui()
     dpg.show_viewport(maximized=True)
     ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()]
+    Puzzle_actif = Puzzle(os.path.join("data/", "personnage.png"))
+
 
     # compteur de pièces obtenues
 
@@ -68,22 +66,25 @@ def main():
 
     with dpg.window(tag="fenetre_principale", show=True, pos=(ECRAN[0]//12, ECRAN[1]//12), width=ECRAN[0]-50, height=ECRAN[1]-100,
                     no_move=True, no_title_bar=True):
-        dpg.add_image("personnage", tag="personnage1", pos=(0, 0), width=100, height=100)
+        dpg.add_image("personnage", tag="personnage1", pos=(0, 0), width=50, height=50)
+
+
+    with dpg.texture_registry(show=True):
+        dpg.add_raw_texture(width=316, height=316, default_value=image_to_list("data/personnage.png"), format=dpg.mvFormat_Float_rgba, tag="texture_tag")
 
 
     # BOUCLE PRINCIPALE
     while dpg.is_dearpygui_running():
         ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()] # Update les dimensions de l'écran à chaque frame
         dpg.configure_item("compteur", label="Pièces obtenues: " + str(x),)
-        dpg.configure_item("fenetre_principale", width=ECRAN[0]-100, height=ECRAN[1]-150, pos=(50, 100))
+
+        dpg.configure_item("fenetre_principale", width=500, height=500, pos=(50, 100))
 
         dpg.render_dearpygui_frame()
 
     dpg.destroy_context()
 
-    
-    
-    
-    
-    
-main()
+
+#main()
+
+print(image_to_list("data/personnage.png"))
