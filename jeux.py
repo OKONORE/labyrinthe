@@ -6,22 +6,19 @@ from math import sqrt
 
 # Classes
 
-class labirynthe:
+class labyrinthe:
     """
     Classe définissant un labirynthe
     """
-    def __init__(self, taille_personnage: int, image: str, pos_depart: tuple[int, int], precedent):
+    def __init__(self, taille_personnage: int, murs: str, fond: str, pos_depart: tuple[int, int], elements_speciaux: list):
+        self.fond = fond
         self.taille_personnage = taille_personnage
-        self.pos_depart = pos_depart
-        self.image = image
-        self.precedent = precedent
-
 
 
 class Puzzle:
-    def __init__(self, nom, path):
-        self.nom = nom
-        self.width, self.height, _, self.data  = dpg.load_image(path)
+    def __init__(self, path):
+        self.path = path
+        self.width, self.height, _, self.data  = dpg.load_image("data/"+path+".png")
         self.pieces_totales = 4
         self.pieces_trouvees = 0
         self.pieces = self.diviser_image()
@@ -33,12 +30,6 @@ class Puzzle:
         racine = round(sqrt(self.pieces_totales))
         cote = self.width // racine
 
-
-
-
-# fonctions
-
-
 def main():
     def viewport_load():
         dpg.create_context()
@@ -48,23 +39,27 @@ def main():
         dpg.show_viewport(maximized=True)
 
     def update_responsive():
-        dpg.configure_item("fenetre_principale", width=min(ECRAN)//100*100, height=min(ECRAN)//100*100, pos=(50, 100))
+        ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()]
+        dpg.configure_item("fond", width=(min(ECRAN))-100, height=(min(ECRAN))-100)
+        dpg.configure_item("compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees) + "/" + str(PUZZLE.pieces_totales), width=ECRAN[0]-30)
 
     viewport_load()
     ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()]
+    PUZZLE = Puzzle("puzzle/1")
+    LABYRINTHES = [labyrinthe(100, None, "fonds/nuages", (0, 0), [])]
+    id_labyrinthe = 0
 
-    puzzle = Puzzle("Premier Puzzle", "data/puzzle/1.png")
     # chargement des textures
 
     with dpg.texture_registry(show=False): # registre des textures chargées
-        for image in ["personnage", "image_test"]:
+        for image in ["personnage", "puzzle/1", "fonds/nuages", "fonds/lave"]:
             width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
             dpg.add_raw_texture(width=width, height=height, default_value=data, format=dpg.mvFormat_Float_rgba, tag=image)
 
     # compteur de pièces obtenues
 
     with dpg.window(label="puzzle", tag="puzzle", autosize=True, no_close=True, no_collapse=True, show=False):
-        dpg.add_image("image_test", width=500, height=500)
+        dpg.add_image(PUZZLE.path, width=500, height=500)
         
     with dpg.window(tag="compteur_pieces", autosize=True, no_move=True,
                     no_bring_to_front_on_focus=True, no_focus_on_appearing=True,
@@ -74,25 +69,27 @@ def main():
 
     # Fenetre principale
 
-    
-    with dpg.window(tag="fenetre_principale", show=True, pos=(100, 100), autosize=True,
-                    no_move=True, no_title_bar=True):
-        dpg.add_image("personnage", tag="personnage1", pos=(0, 0), width=500, height=500)
+    with dpg.window(tag="fenetre_principale", show=True, pos=(50, 75), autosize=True,
+                    no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
+        dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=500, height=500)
+        dpg.add_image("personnage", tag="Personnage", pos=(0, 0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
 
     # BOUCLE PRINCIPALE
+
     while dpg.is_dearpygui_running():
-        ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()] # Update les dimensions de l'écran à chaque frame
-        dpg.configure_item("compteur", label="Pièces obtenues: " + str(puzzle.pieces_trouvees) + "/" + str(puzzle.pieces_totales))
-        
+  
         if keyboard.is_pressed("down arrow"):
-            pass
+            pos = dpg.get_item_pos("Personnage")
+            dpg.configure_item("Personnage", pos=(pos[0], pos[1]+10))
         if keyboard.is_pressed("up arrow"):
-            pass
+            pos = dpg.get_item_pos("Personnage")
+            dpg.configure_item("Personnage", pos=(pos[0], pos[1]-10))
         if keyboard.is_pressed("left arrow"):
-            pass
+            pos = dpg.get_item_pos("Personnage")
+            dpg.configure_item("Personnage", pos=(pos[0]-10, pos[1]))
         if keyboard.is_pressed("right arrow"):
-            pass
-            
+            pos = dpg.get_item_pos("Personnage")
+            dpg.configure_item("Personnage", pos=(pos[0]+10, pos[1]))
 
         dpg.render_dearpygui_frame()
 
