@@ -21,23 +21,27 @@ class Puzzle:
     def __init__(self, path):
         self.path = path
         self.image_actuelle = self.image_to_list()
-        print(self.image_actuelle)
         self.pieces_totales = 4
         self.pieces_trouvees = 0
 
     def image_to_list(self):
         myimage = Image.open("data/"+self.path+".png")
         self.width, self.height = myimage.size
-        return [255/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
+        return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
 
-
-    def rendre_invisible(self, image):
-        pass
+    def rendre_invisible(self):
+        for i in range(3, self.width*self.height*4, 4):
+            self.image_actuelle[i] = 0.0
+        dpg.set_value(self.path, self.image_actuelle)
 
     def piece_trouve(self):
-        self.pieces_trouvees += 1
-        
+        racine = sqrt(self.pieces_totales)
+        cote = self.width // racine
 
+        ##### ICIC FAIRE LA BOUCLE POUR L'IMAGE EN 1D
+
+        self.pieces_trouvees += 1
+        update_responsive()
 
 
 def main():
@@ -97,14 +101,14 @@ def main():
     # chargement des textures
 
     with dpg.texture_registry(show=False): # registre des textures chargées
-        for image in [  "personnage", "puzzle/1", 
+        for image in [  "personnage", 
                         "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                         
                         ]:
             width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
             dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
-
-            dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag="imaged")
+        dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
+        PUZZLE.rendre_invisible()
 
     # compteur de pièces obtenues
 
