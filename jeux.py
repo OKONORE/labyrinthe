@@ -4,6 +4,7 @@ import keyboard
 import array
 from math import sqrt
 from PIL import Image
+from playsound import playsound
 
 # Classes
 
@@ -12,12 +13,18 @@ class labyrinthe:
     Classe définissant un labirynthe
     """
     def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart: tuple[int, int], couleur_fond: tuple[int, int, int], elements_speciaux: list, histoire: str):
-        self.id = id
         self.fond = fond
+        self.murs = murs
         self.taille_personnage = taille_personnage
         self.pos_depart = pos_depart
         self.couleur_fond = couleur_fond
         self.histoire = histoire
+
+    def image_to_list(self, image):
+        """transforme un image, en une liste en 1 dimension"""
+        myimage = Image.open("data/"+image+".png")
+        self.width, self.height = myimage.size
+        return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
 
 class Puzzle:
     def __init__(self, path):
@@ -79,23 +86,22 @@ def main():
             return self.pos
 
         def haut(self, vitesse):
-            self.pos[1] = max(-50, self.pos[1]-vitesse)
+            self.pos[1] = max(0, self.pos[1]-vitesse)
             return self.pos
         def bas(self, vitesse):
-            self.pos[1] = min(min(ECRAN)-200, self.pos[1]+vitesse)
+            self.pos[1] = min(min(ECRAN)-150, self.pos[1]+vitesse)
             return self.pos
         def gauche(self, vitesse):
-            self.pos[0] = max(-50, self.pos[0]-vitesse)
+            self.pos[0] = max(0, self.pos[0]-vitesse)
             return self.pos
         def droite(self, vitesse):
-            self.pos[0] = min(min(ECRAN)-200, pos[0]+vitesse)
+            self.pos[0] = min(min(ECRAN)-150, pos[0]+vitesse)
             return self.pos
 
     def viewport_load():
         dpg.create_context()
         dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
         dpg.set_viewport_large_icon("data/personnage.png")
-        dpg.set_viewport_small_icon("data/personnage.png")
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
@@ -104,27 +110,30 @@ def main():
 
         global id_labyrinthe
         id_labyrinthe += 1
+        assert id_labyrinthe < len(LABYRINTHES), "il n'y à pas autant de labirynthes"
+            
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
         dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart)
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
-        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)   
+        dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
+        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
+        
     
     def interface():
         """charge toutes les interfaces"""
-
-        DEBUG_MODE = True # Permet l'affichage du mode débug
 
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
             for image in [ 
                 "personnage", "logo",
                 "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
+                "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                         ]:
                 width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
-                dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
+                dpg.add_static_texture(width=width, height=height, default_value=data, tag=image)
             dpg.add_dynamic_texture(width=PUZZLE.width, height=PUZZLE.height, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
             PUZZLE.rendre_invisible()
-
+                
         # compteur de pièces obtenues
 
         with dpg.window(label="puzzle", tag="puzzle", autosize=True, no_close=True, no_collapse=True, show=False):
@@ -139,15 +148,17 @@ def main():
                 if DEBUG_MODE:
                     dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
                     dpg.add_button(tag="DEBUG_puzzle", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
+                    dpg.add_button(tag="DEBUG_compteur", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
+                    dpg.add_input_int(tag="DEBUG_X_perso", label="", width=25)
 
             
         # Fenetre principale
 
         with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
                         no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
-            dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=min(ECRAN)-100, height=min(ECRAN)-100)
-            dpg.add_image(  "personnage", tag="Personnage", pos=(0,0),
-                            width=50, height=50)
+            dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
+            dpg.add_image(LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
+            dpg.add_image(  "personnage", tag="Personnage", pos=(0,0), width=50, height=50)
 
         # Fenetre d'histoire
 
@@ -167,16 +178,17 @@ def main():
             dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=150, callback=dpg.stop_dearpygui)
 
     ECRAN = [1280, 800]   
-    PUZZLE = Puzzle("puzzle/1")
+    PUZZLE = Puzzle("puzzle/puzzle1")
     LABYRINTHES = [ 
-        labyrinthe(1.0, None, "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
-        labyrinthe(1.0, None, "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe(1.0, None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
-        labyrinthe(1.0, None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
+        labyrinthe(1.0, "labirynthes/1",   "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
+        labyrinthe(1.0, "labirynthes/2",   "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe(1.0, "labirynthes/3",   "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe(1.0, "labirynthes/4",   "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
     VITESSE = 10
-    global id_labyrinthe
+    global id_labyrinthe, DEBUG_MODE
     id_labyrinthe = -1
+    DEBUG_MODE = True # Permet l'affichage du mode débug
     viewport_load()
     Position_perso = Position()
     interface()
@@ -187,6 +199,8 @@ def main():
     # BOUCLE PRINCIPALE
 
     while dpg.is_dearpygui_running():
+        
+        playsound('/data/sons/plaine.mp3')
 
         Vitesse = round(LABYRINTHES[id_labyrinthe].taille_personnage*VITESSE)
         if keyboard.is_pressed("down arrow"):
