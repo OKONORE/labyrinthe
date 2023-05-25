@@ -94,6 +94,8 @@ def main():
     def viewport_load():
         dpg.create_context()
         dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
+        dpg.set_viewport_large_icon("data/personnage.png")
+        dpg.set_viewport_small_icon("data/personnage.png")
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
@@ -145,7 +147,7 @@ def main():
                         no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
             dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=min(ECRAN)-100, height=min(ECRAN)-100)
             dpg.add_image(  "personnage", tag="Personnage", pos=(0,0),
-                            width=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage, height=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage)
+                            width=50, height=50)
 
         # Fenetre d'histoire
 
