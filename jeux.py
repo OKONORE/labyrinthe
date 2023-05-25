@@ -27,24 +27,42 @@ class Puzzle:
         self.pieces_trouvees = 0
 
     def image_to_list(self):
+        """transforme un image, en une liste en 1 dimension"""
+
         myimage = Image.open("data/"+self.path+".png")
         self.width, self.height = myimage.size
         return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
 
     def rendre_invisible(self):
+        """Rend le puzzle invisble en mettant l'opacité à 0 de chaque pixel de la liste en 1D"""
+
         for i in range(3, self.width*self.height*4, 4):
             self.image_actuelle[i] = 0.0
         dpg.set_value(self.path, self.image_actuelle)
 
     def piece_trouve(self):
-        racine = sqrt(self.pieces_totales)
-        cote = self.width // racine
-
-        for i in range(0, cote*cote):
-            pass
-
+        """modifie l'image, afin de faire apparaitre un coin du puzzle"""
+        cote = round(self.width // sqrt(self.pieces_totales))
+        if self.pieces_trouvees == 0:
+            for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
+                for x in range(3+y, y+cote*4, 4):
+                    self.image_actuelle[x] = 1.0
+        elif self.pieces_trouvees == 1:
+            for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
+                for x in range(-3+y, y+cote*4, 4):
+                    self.image_actuelle[-x] = 1.0
+        elif self.pieces_trouvees == 2:
+            for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
+                for x in range(3+y, y+cote*4, 4):
+                    self.image_actuelle[x] = 1.0
+        elif self.pieces_trouvees == 3:
+            for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
+                for x in range(-3+y, y+cote*4, 4):
+                    self.image_actuelle[-x] = 1.0
+        
         self.pieces_trouvees += 1
-        update_responsive()
+        dpg.configure_item("compteur", label="Pièces obtenues: " +str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
+        dpg.set_value(self.path, self.image_actuelle)
 
 def main():
  
@@ -79,6 +97,8 @@ def main():
         dpg.show_viewport()
 
     def labirynthe_suivant():
+        """change les interfaces pour faire apparraitre le prochain labyrinthe"""
+
         global id_labyrinthe
         id_labyrinthe += 1
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
@@ -89,6 +109,8 @@ def main():
         
     
     def interface():
+        """charge toutes les interfaces"""
+
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
             for image in [ 
@@ -97,7 +119,7 @@ def main():
                         ]:
                 width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
                 dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
-            dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
+            dpg.add_dynamic_texture(width=PUZZLE.width, height=PUZZLE.height, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
             PUZZLE.rendre_invisible()
 
         # compteur de pièces obtenues
@@ -108,7 +130,7 @@ def main():
         with dpg.window(tag="compteur_pieces", autosize=True, no_move=True,
                         no_bring_to_front_on_focus=True, no_focus_on_appearing=True,
                         no_background=True, no_title_bar=True, pos=(20, 10)):
-            dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width= 700)
+            dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees)+"/"+str(PUZZLE.pieces_totales), width= 700)
             with dpg.group(horizontal=True):
                 dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
                 dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
@@ -143,8 +165,8 @@ def main():
     PUZZLE = Puzzle("puzzle/1")
     LABYRINTHES = [ 
         labyrinthe(1.0, None, "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Forêt est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
-        labyrinthe(1.0, None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nuage est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
         labyrinthe(1.0, None, "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Désert est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe(1.0, None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nuage est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
         labyrinthe(1.0, None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Lave est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
     VITESSE = 10
