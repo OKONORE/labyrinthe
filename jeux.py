@@ -84,6 +84,10 @@ def main():
             self.taille_ecran = min(ecran)
             return self.pos
 
+        def set_pos(self, position):
+            self.pos = position
+            dpg.configure_item("Personnage", pos=self.pos)
+
         def haut(self, vitesse):
             self.pos[1] = max(0, self.pos[1]-vitesse)
             return self.pos
@@ -94,7 +98,7 @@ def main():
             self.pos[0] = max(0, self.pos[0]-vitesse)
             return self.pos
         def droite(self, vitesse):
-            self.pos[0] = min(min(ECRAN)-150, pos[0]+vitesse)
+            self.pos[0] = min(min(ECRAN)-150, self.pos[0]+vitesse)
             return self.pos
 
     def viewport_load():
@@ -148,7 +152,8 @@ def main():
                     dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
                     dpg.add_button(tag="DEBUG_puzzle", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
                     dpg.add_button(tag="DEBUG_compteur", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
-                    dpg.add_input_int(tag="DEBUG_X_perso", label="", width=25)
+                    dpg.add_input_int(tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
+                    dpg.add_input_int(tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
 
             
         # Fenetre principale
@@ -201,18 +206,17 @@ def main():
 
         Vitesse = round(LABYRINTHES[id_labyrinthe].taille_personnage*VITESSE)
         if keyboard.is_pressed("down arrow"):
-            pos = dpg.get_item_pos("Personnage")
             dpg.configure_item("Personnage", pos=Position_perso.bas(Vitesse))
         if keyboard.is_pressed("up arrow"):
-            pos = dpg.get_item_pos("Personnage")
             dpg.configure_item("Personnage", pos=Position_perso.haut(Vitesse))
         if keyboard.is_pressed("left arrow"):
-            pos = dpg.get_item_pos("Personnage")
             dpg.configure_item("Personnage", pos=Position_perso.gauche(Vitesse))
         if keyboard.is_pressed("right arrow"):
-            pos = dpg.get_item_pos("Personnage")
             dpg.configure_item("Personnage", pos=Position_perso.droite(Vitesse))
 
+        if DEBUG_MODE:
+            dpg.configure_item("DEBUG_Y_perso", default_value=Position_perso.pos[1])
+            dpg.configure_item("DEBUG_X_perso", default_value=Position_perso.pos[0])
         dpg.render_dearpygui_frame()
 
     dpg.destroy_context()
