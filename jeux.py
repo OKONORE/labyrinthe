@@ -53,14 +53,14 @@ class Puzzle:
                 for x in range(-3+y, y+cote*4, 4):
                     self.image_actuelle[-x] = 1.0
         elif self.pieces_trouvees == 2:
-            for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
+            for y in [i*4 for i in range(cote*cote*2, cote*cote*4, cote*2)]:
                 for x in range(3+y, y+cote*4, 4):
                     self.image_actuelle[x] = 1.0
         elif self.pieces_trouvees == 3:
-            for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
+            for y in [-i*4 for i in range(-cote*cote*2, -cote*cote*4, -cote*2)]:
                 for x in range(-3+y, y+cote*4, 4):
                     self.image_actuelle[-x] = 1.0
-        
+            
         self.pieces_trouvees += 1
         dpg.configure_item("compteur", label="Pièces obtenues: " +str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
         dpg.set_value(self.path, self.image_actuelle)
@@ -105,12 +105,12 @@ def main():
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
         dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart)
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
-        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
-        
-        
+        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)   
     
     def interface():
         """charge toutes les interfaces"""
+
+        DEBUG_MODE = True # Permet l'affichage du mode débug
 
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
@@ -134,7 +134,9 @@ def main():
             dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees)+"/"+str(PUZZLE.pieces_totales), width= 700)
             with dpg.group(horizontal=True):
                 dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
-                dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
+                if DEBUG_MODE:
+                    dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
+                    dpg.add_button(tag="DEBUG_puzzle", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
 
             
         # Fenetre principale
@@ -177,6 +179,8 @@ def main():
     Position_perso = Position()
     interface()
     labirynthe_suivant()
+
+    
 
     # BOUCLE PRINCIPALE
 
