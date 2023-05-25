@@ -11,11 +11,11 @@ class labyrinthe:
     """
     Classe définissant un labirynthe
     """
-    def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart: tuple[int, int], elements_speciaux: list):
+    def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart: tuple[int, int], couleur_fond: tuple[int, int, int], elements_speciaux: list):
         self.fond = fond
         self.taille_personnage = taille_personnage
         self.pos_depart = pos_depart
-
+        self.couleur_fond = couleur_fond
 
 class Puzzle:
     def __init__(self, path):
@@ -38,11 +38,11 @@ class Puzzle:
         racine = sqrt(self.pieces_totales)
         cote = self.width // racine
 
-        ##### ICIC FAIRE LA BOUCLE POUR L'IMAGE EN 1D
+        for i in range(0, cote*cote):
+            pass
 
         self.pieces_trouvees += 1
         update_responsive()
-
 
 def main():
 
@@ -58,53 +58,47 @@ def main():
             return self.pos
 
         def haut(self, vitesse):
-            self.pos[1] = max(0, self.pos[1]-vitesse)
+            self.pos[1] = max(-50, self.pos[1]-vitesse)
             return self.pos
         def bas(self, vitesse):
-            self.pos[1] = min(min(ECRAN), self.pos[1]+vitesse)
+            self.pos[1] = min(min(ECRAN)-200, self.pos[1]+vitesse)
             return self.pos
         def gauche(self, vitesse):
-            self.pos[0] = max(0, self.pos[0]-vitesse)
+            self.pos[0] = max(-50, self.pos[0]-vitesse)
             return self.pos
         def droite(self, vitesse):
-            self.pos[0] = min(min(ECRAN), pos[0]+vitesse)
+            self.pos[0] = min(min(ECRAN)-200, pos[0]+vitesse)
             return self.pos
 
     def viewport_load():
         dpg.create_context()
-        dpg.create_viewport(title='Labirynthe', resizable=True, vsync=True, clear_color=(0, 0, 0))
+        dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
         dpg.setup_dearpygui()
-        dpg.set_viewport_resize_callback(update_responsive)
-        dpg.show_viewport(maximized=True)
+        dpg.show_viewport()
 
 
-    def update_responsive():
-        ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()]
-        dpg.configure_item("fond", width=min(ECRAN)-100, height=min(ECRAN)-100)
-        dpg.configure_item("compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees) + "/" + str(PUZZLE.pieces_totales), width=ECRAN[0]-30)
-        dpg.configure_item("Personnage", pos=Position_perso.resize(ECRAN), width=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage, height=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage)
-
-
-    viewport_load()
-    ECRAN = [dpg.get_viewport_client_width(), dpg.get_viewport_client_height()]
+    
+    ECRAN = [1280, 800]
     PUZZLE = Puzzle("puzzle/1")
-    LABYRINTHES = [ labyrinthe(1.0 , None, "fonds/plaine",  (0, 0), []), 
-                    labyrinthe(1.0 , None, "fonds/nuages",  (0, 0), []), 
-                    labyrinthe(1.0 , None, "fonds/desert",  (0, 0), []), 
-                    labyrinthe(1.0 , None, "fonds/lave",    (0, 0), [])
+    LABYRINTHES = [ 
+        labyrinthe(1.0 , None, "fonds/plaine",  (0, 0), (), []), 
+        labyrinthe(1.0 , None, "fonds/nuages",  (0, 0), (), []), 
+        labyrinthe(1.0 , None, "fonds/desert",  (0, 0), (), []), 
+        labyrinthe(1.0 , None, "fonds/lave",    (0, 0), (), []),
                     ]
     VITESSE = 10
     Position_perso = Position()
-
     id_labyrinthe = 0
 
+    viewport_load()
     # chargement des textures
 
     with dpg.texture_registry(show=False): # registre des textures chargées
-        for image in [  "personnage", 
-                        "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
-                        
-                        ]:
+        for image in [ 
+            "personnage", 
+            "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
+                    ]:
+
             width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
             dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
         dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
@@ -118,16 +112,29 @@ def main():
     with dpg.window(tag="compteur_pieces", autosize=True, no_move=True,
                     no_bring_to_front_on_focus=True, no_focus_on_appearing=True,
                     no_background=True, no_title_bar=True, pos=(10, 10)):
-        dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width=ECRAN[0]//6)
+        dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width= ECRAN[0]-30)
         dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
-
+        
     # Fenetre principale
 
-    with dpg.window(tag="fenetre_principale", show=True, pos=(50, 75), autosize=True,
+    with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
                     no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
         dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=min(ECRAN)-100, height=min(ECRAN)-100)
         dpg.add_image(  "personnage", tag="Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart, 
                         width=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage, height=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage)
+
+    # Fenetre d'histoire
+    
+    with dpg.window(label="L'histoire du labirynthe Cosmique", tag="histoire", no_close=True, no_collapse=True, show=True, no_move=True,
+                    pos=(ECRAN[0]-530, ECRAN[1] - 750), width=500):
+        dpg.add_text(wrap=500, default_value="Un adorable petit chat nommé Félix se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Félix décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Félix doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Félix à s'échapper des labyrinthes cosmiques ?")
+
+    # Fenetre quitter
+
+    with dpg.window(tag="fenetre_quitter", no_title_bar=True, no_move=True, no_background=True,
+                    pos=(ECRAN[0]-530, ECRAN[1] - 200), autosize=True):
+        dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=150, callback=dpg.stop_dearpygui)
+
 
     # BOUCLE PRINCIPALE
 
@@ -146,7 +153,7 @@ def main():
         if keyboard.is_pressed("right arrow"):
             pos = dpg.get_item_pos("Personnage")
             dpg.configure_item("Personnage", pos=Position_perso.droite(Vitesse))
-        
+
         dpg.render_dearpygui_frame()
 
     dpg.destroy_context()
