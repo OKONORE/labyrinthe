@@ -127,6 +127,19 @@ def main():
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
         dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
         dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
+
+    def labirynthe_precedent():
+        """change les interfaces pour faire apparraitre le prochain labyrinthe"""
+
+        global id_labyrinthe
+        id_labyrinthe -= 1
+        assert id_labyrinthe < len(LABYRINTHES), "il n'y à pas autant de labirynthes"
+            
+        dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
+        dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart, width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
+        dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
+        dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
+        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
         
     
     def interface():
@@ -156,6 +169,7 @@ def main():
             with dpg.group(horizontal=True):
                 dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
                 if DEBUG_MODE:
+                    dpg.add_button(tag="DEBUG_precedent", label="DEBUG_PRECEDENT", callback=lambda: labirynthe_precedent())
                     dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
                     dpg.add_button(tag="DEBUG_puzzle", label="DEBUG_PUZZLE", callback=lambda: PUZZLE.piece_trouve())
                     dpg.add_input_int(tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
