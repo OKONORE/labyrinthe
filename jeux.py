@@ -47,8 +47,7 @@ class Puzzle:
         update_responsive()
 
 def main():
-
-
+ 
     class Position:
         def __init__(self):
             self.pos = [0, 0]
@@ -79,11 +78,14 @@ def main():
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
-    def changer_labirynthe(id):
-        dpg.set_viewport_clear_color(LABYRINTHES[id].couleur_fond)
-        dpg.configure_item("Personnage", pos=LABYRINTHES[id].pos_depart)
-        dpg.configure_item("fond", texture_tag=LABYRINTHES[id].fond)
-        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id].histoire)
+    def labirynthe_suivant():
+        global id_labyrinthe
+        id_labyrinthe += 1
+        dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
+        dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart)
+        dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
+        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
+        
         
     
     def interface():
@@ -109,7 +111,8 @@ def main():
             dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width= 700)
             with dpg.group(horizontal=True):
                 dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
-                dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: changer_labirynthe(2))
+                dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: labirynthe_suivant())
+
             
         # Fenetre principale
 
@@ -126,9 +129,9 @@ def main():
             dpg.add_image("logo", pos=(100, 0), width=320, height=180)
             dpg.add_text(tag="histoire_générale", wrap=500, pos=(5, 175), default_value="Un adorable petit chat nommé Félix se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Félix décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Félix doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Félix à s'échapper des labyrinthes cosmiques ?")
 
-        with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True,
-                        pos=(ECRAN[0]-530, ECRAN[1] - 450), width=500):
-            dpg.add_text(tag="histoire_l", wrap=500, pos=(5, 0), default_value="")
+        with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
+                        pos=(ECRAN[0]-530, ECRAN[1] - 475), width=500):
+            dpg.add_text(tag="histoire_l", wrap=500, pos=(5, 20), default_value="")
 
         # Fenetre quitter
 
@@ -145,12 +148,12 @@ def main():
         labyrinthe(1.0, None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Lave est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
     VITESSE = 10
-
-    id_labyrinthe = 0
+    global id_labyrinthe
+    id_labyrinthe = -1
     viewport_load()
     Position_perso = Position()
     interface()
-    changer_labirynthe(id_labyrinthe)
+    labirynthe_suivant()
 
     # BOUCLE PRINCIPALE
 
