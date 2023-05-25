@@ -42,6 +42,7 @@ class Puzzle:
 
     def piece_trouve(self):
         """modifie l'image, afin de faire apparaitre un coin du puzzle"""
+
         cote = round(self.width // sqrt(self.pieces_totales))
         if self.pieces_trouvees == 0:
             for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
@@ -164,10 +165,10 @@ def main():
     ECRAN = [1280, 800]   
     PUZZLE = Puzzle("puzzle/1")
     LABYRINTHES = [ 
-        labyrinthe(1.0, None, "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Forêt est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
-        labyrinthe(1.0, None, "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Désert est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe(1.0, None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nuage est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
-        labyrinthe(1.0, None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Lave est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
+        labyrinthe(1.0, None, "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
+        labyrinthe(1.0, None, "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe(1.0, None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe(1.0, None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
     VITESSE = 10
     global id_labyrinthe
