@@ -11,11 +11,12 @@ class labyrinthe:
     """
     Classe définissant un labirynthe
     """
-    def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart: tuple[int, int], couleur_fond: tuple[int, int, int], elements_speciaux: list):
+    def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart: tuple[int, int], couleur_fond: tuple[int, int, int], elements_speciaux: list, histoire: str):
         self.fond = fond
         self.taille_personnage = taille_personnage
         self.pos_depart = pos_depart
         self.couleur_fond = couleur_fond
+        self.histoire = histoire
 
 class Puzzle:
     def __init__(self, path):
@@ -76,64 +77,79 @@ def main():
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
-
+    def changer_labirynthe(id):
+        dpg.set_viewport_clear_color(LABYRINTHES[id].couleur_fond)
+        dpg.configure_item("Personnage", pos=LABYRINTHES[id].pos_depart)
+        dpg.configure_item("fond", texture_tag=LABYRINTHES[id].fond)
+        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id].histoire)
+        
     
-    ECRAN = [1280, 800]
+    def interface():
+        # chargement des textures
+        with dpg.texture_registry(show=False): # registre des textures chargées
+            for image in [ 
+                "personnage", "logo",
+                "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
+                        ]:
+                width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
+                dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
+            dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
+            PUZZLE.rendre_invisible()
+
+        # compteur de pièces obtenues
+
+        with dpg.window(label="puzzle", tag="puzzle", autosize=True, no_close=True, no_collapse=True, show=False):
+            dpg.add_image(PUZZLE.path, width=ECRAN[0]//3, height=ECRAN[0]//3)
+
+        with dpg.window(tag="compteur_pieces", autosize=True, no_move=True,
+                        no_bring_to_front_on_focus=True, no_focus_on_appearing=True,
+                        no_background=True, no_title_bar=True, pos=(20, 10)):
+            dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width= 700)
+            with dpg.group(horizontal=True):
+                dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
+                dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback=lambda: changer_labirynthe(id_labyrinthe+1))
+            
+        # Fenetre principale
+
+        with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
+                        no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
+            dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=min(ECRAN)-100, height=min(ECRAN)-100)
+            dpg.add_image(  "personnage", tag="Personnage", pos=(0,0),
+                            width=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage, height=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage)
+
+        # Fenetre d'histoire
+
+        with dpg.window(label="L'histoire du labirynthe Cosmique", tag="histoire", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True,
+                        pos=(ECRAN[0]-530, ECRAN[1] - 790), width=500):
+            dpg.add_image("logo", pos=(100, 0), width=320, height=180)
+            dpg.add_text(tag="histoire_générale", wrap=500, pos=(5, 175), default_value="Un adorable petit chat nommé Félix se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Félix décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Félix doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Félix à s'échapper des labyrinthes cosmiques ?")
+
+        with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True,
+                        pos=(ECRAN[0]-530, ECRAN[1] - 450), width=500):
+            dpg.add_text(tag="histoire_l", wrap=500, pos=(5, 0), default_value="")
+
+        # Fenetre quitter
+
+        with dpg.window(tag="fenetre_quitter", no_title_bar=True, no_move=True, no_background=True,
+                        pos=(ECRAN[0]-530, ECRAN[1] - 200), autosize=True):
+            dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=150, callback=dpg.stop_dearpygui)
+
+
+    ECRAN = [1280, 800]   
     PUZZLE = Puzzle("puzzle/1")
     LABYRINTHES = [ 
-        labyrinthe(1.0 , None, "fonds/plaine",  (0, 0), (), []), 
-        labyrinthe(1.0 , None, "fonds/nuages",  (0, 0), (), []), 
-        labyrinthe(1.0 , None, "fonds/desert",  (0, 0), (), []), 
-        labyrinthe(1.0 , None, "fonds/lave",    (0, 0), (), []),
+        labyrinthe(1.0 , None, "fonds/plaine",  (0, 0), (9, 74, 0), [], "La Planète Forêt est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt. "), 
+        labyrinthe(1.0 , None, "fonds/nuages",  (0, 0), (122, 214, 235), [], "La Planète Nuage est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe(1.0 , None, "fonds/desert",  (0, 0), (219, 76, 33), [], "La Planète Désert est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe(1.0 , None, "fonds/lave",    (0, 0), (117, 1, 1), [], "La Planète Lave est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
     VITESSE = 10
+       
+    viewport_load()
     Position_perso = Position()
     id_labyrinthe = 0
-
-    viewport_load()
-    # chargement des textures
-
-    with dpg.texture_registry(show=False): # registre des textures chargées
-        for image in [ 
-            "personnage", 
-            "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
-                    ]:
-
-            width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
-            dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag=image)
-        dpg.add_dynamic_texture(width=375, height=375, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
-        PUZZLE.rendre_invisible()
-
-    # compteur de pièces obtenues
-
-    with dpg.window(label="puzzle", tag="puzzle", autosize=True, no_close=True, no_collapse=True, show=False):
-        dpg.add_image(PUZZLE.path, width=ECRAN[0]//3, height=ECRAN[0]//3)
-
-    with dpg.window(tag="compteur_pieces", autosize=True, no_move=True,
-                    no_bring_to_front_on_focus=True, no_focus_on_appearing=True,
-                    no_background=True, no_title_bar=True, pos=(10, 10)):
-        dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(1), width= ECRAN[0]-30)
-        dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
-        
-    # Fenetre principale
-
-    with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
-                    no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
-        dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=min(ECRAN)-100, height=min(ECRAN)-100)
-        dpg.add_image(  "personnage", tag="Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart, 
-                        width=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage, height=min(ECRAN)/5*LABYRINTHES[id_labyrinthe].taille_personnage)
-
-    # Fenetre d'histoire
-    
-    with dpg.window(label="L'histoire du labirynthe Cosmique", tag="histoire", no_close=True, no_collapse=True, show=True, no_move=True,
-                    pos=(ECRAN[0]-530, ECRAN[1] - 750), width=500):
-        dpg.add_text(wrap=500, default_value="Un adorable petit chat nommé Félix se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Félix décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Félix doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Félix à s'échapper des labyrinthes cosmiques ?")
-
-    # Fenetre quitter
-
-    with dpg.window(tag="fenetre_quitter", no_title_bar=True, no_move=True, no_background=True,
-                    pos=(ECRAN[0]-530, ECRAN[1] - 200), autosize=True):
-        dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=150, callback=dpg.stop_dearpygui)
+    interface()
+    changer_labirynthe(0)
 
 
     # BOUCLE PRINCIPALE
