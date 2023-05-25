@@ -4,7 +4,6 @@ import keyboard
 import array
 from math import sqrt
 from PIL import Image
-from playsound import playsound
 
 # Classes
 
@@ -199,8 +198,6 @@ def main():
     # BOUCLE PRINCIPALE
 
     while dpg.is_dearpygui_running():
-        
-        playsound('/data/sons/plaine.mp3')
 
         Vitesse = round(LABYRINTHES[id_labyrinthe].taille_personnage*VITESSE)
         if keyboard.is_pressed("down arrow"):
