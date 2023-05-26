@@ -3,8 +3,6 @@ import os
 import keyboard
 from math import sqrt
 from PIL import Image
-import simpleaudio as sa
-import wave
 
 # Classes
 
