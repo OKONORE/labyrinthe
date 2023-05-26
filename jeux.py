@@ -24,6 +24,11 @@ class labyrinthe:
     def est_mur(self, pos):
         return self.murs_data.getpixel((pos[0]+self.taille_personnage//2, pos[1]+self.taille_personnage//2))[3] > 200
 
+class Special:
+    def __init__(self, type, image, pos, callback):
+        self.type = type
+
+
 
 class Puzzle:
     def __init__(self, path):
@@ -116,24 +121,22 @@ def main():
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
-    def labirynthe_suivant():
+    def labirynthe_i(i):
         """change les interfaces pour faire apparraitre le prochain labyrinthe"""
 
         global id_labyrinthe
-        id_labyrinthe += 1
+        id_labyrinthe += i
+        if id_labyrinthe >= len(LABYRINTHES):
+            id_labyrinthe = 0
+        elif id_labyrinthe < 0:
+            id_labyrinthe = len(LABYRINTHES)-1
+
         Position_perso.pos = LABYRINTHES[id_labyrinthe].pos_depart
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
         dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe].pos_depart, width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
         dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
         dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
-
-    def labirynthe_precedent():
-        """change les interfaces pour faire apparraitre le précedent labyrinthe"""
-        global id_labyrinthe
-        id_labyrinthe -= 1
-        labirynthe_suivant()
-        
     
     def interface():
         """charge toutes les interfaces"""
@@ -141,7 +144,7 @@ def main():
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
             for image in [ 
-                "personnage", "logo",
+                "personnage", "logo", "piece", "portail", "fleches",
                 "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                 "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                         ]:
@@ -149,7 +152,7 @@ def main():
                 dpg.add_static_texture(width=width, height=height, default_value=data, tag=image)
             dpg.add_dynamic_texture(width=PUZZLE.width, height=PUZZLE.height, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
             PUZZLE.rendre_invisible()
-            
+
         # compteur de pièces obtenues
 
         with dpg.window(label="puzzle", tag="puzzle", autosize=True, no_close=True, no_collapse=True, show=False):
@@ -160,13 +163,20 @@ def main():
                         no_background=True, no_title_bar=True, pos=(20, 10)):
             dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees)+"/"+str(PUZZLE.pieces_totales), width= 700)
             with dpg.group(horizontal=True):
-                dpg.add_checkbox(label="Afficher Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
-                if DEBUG_MODE:
-                    dpg.add_button(tag="DEBUG_precedent", label="DEBUG_PRECEDENT", callback= labirynthe_precedent)
-                    dpg.add_button(tag="DEBUG_suivant", label="DEBUG_SUIVANT", callback= labirynthe_suivant)
-                    dpg.add_button(tag="DEBUG_puzzle", label="DEBUG_PUZZLE", callback= PUZZLE.piece_trouve)
-                    dpg.add_input_int(tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
-                    dpg.add_input_int(tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
+                dpg.add_checkbox(label="Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
+                
+                def debug_mode(sender, app_data):
+                    for element in ["DEBUG_PRECEDENT", "DEBUG_SUIVANT", "DEBUG_PUZZLE", "DEBUG_X_perso", "DEBUG_Y_perso"]:
+                        dpg.configure_item(element, show=app_data)
+
+                dpg.add_checkbox(label="DEBUG MODE", callback=debug_mode)
+
+                dpg.add_button(show=False, label="DEBUG_PRECEDENT", tag="DEBUG_PRECEDENT", callback= lambda: labirynthe_i(-1))
+                dpg.add_button(show=False, label="DEBUG_SUIVANT", tag="DEBUG_SUIVANT", callback= lambda: labirynthe_i(1))
+                dpg.add_button(show=False, label="DEBUG_PUZZLE", tag="DEBUG_PUZZLE", callback= PUZZLE.piece_trouve)
+                
+                dpg.add_input_int(show=False, tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
+                dpg.add_input_int(show=False, tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Position_perso.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
 
             
         # Fenetre principale
@@ -184,15 +194,26 @@ def main():
             dpg.add_image("logo", pos=(100, 0), width=320, height=180)
             dpg.add_text(tag="histoire_générale", wrap=500, pos=(5, 175), default_value="Un adorable petit chat nommé Félix se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Félix décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Félix doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Félix à s'échapper des labyrinthes cosmiques ?")
 
-        with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
-                        pos=(ECRAN[0]-530, ECRAN[1] - 475), width=500):
+        with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=False, no_title_bar=True,
+                        pos=(ECRAN[0]-530, ECRAN[1] - 475), width=500, height=130):
             dpg.add_text(tag="histoire_l", wrap=500, pos=(5, 20), default_value="")
 
+        # Fenetre tuto
+
+        with dpg.window(tag="fenetre_tuto", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
+                        pos=(ECRAN[0]-530, ECRAN[1]-330), width=500):
+            with dpg.group(horizontal=True):
+                for image, phrase in [("piece", "C'est une pièce de la carte, trouvez la"), ("portail", "C'est un portail, il vous emmenera a un autre niveau") , ("personnage", "C'est vous, felix"), ("fleches", "Utilisez les flèches pour vous déplacer")]:
+                    with dpg.group():
+                        dpg.add_image(image, width=95, height=95)
+                        dpg.add_text(wrap=80, default_value=phrase)
+                    dpg.add_spacer(width=12)
+                
         # Fenetre quitter
 
         with dpg.window(tag="fenetre_quitter", no_title_bar=True, no_move=True, no_background=True,
-                        pos=(ECRAN[0]-530, ECRAN[1] - 200), autosize=True):
-            dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=150, callback=dpg.stop_dearpygui)
+                        pos=(ECRAN[0]-537, ECRAN[1] - 130), autosize=True):
+            dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=90, callback=dpg.stop_dearpygui)
 
     ECRAN = [1280, 800]   
     PUZZLE = Puzzle("puzzle/puzzle1")
@@ -204,12 +225,11 @@ def main():
                     ]
     VITESSE = 5
     global id_labyrinthe, DEBUG_MODE
-    id_labyrinthe = -1
-    DEBUG_MODE = True # Permet l'affichage du mode débug
+    id_labyrinthe = 0
     viewport_load()
     Position_perso = Position()
     interface()
-    labirynthe_suivant()
+    labirynthe_i(id_labyrinthe)
 
     # BOUCLE PRINCIPALE
 
@@ -225,7 +245,7 @@ def main():
         if keyboard.is_pressed("right arrow"):
             dpg.configure_item("Personnage", pos=Position_perso.droite(Vitesse))
 
-        if DEBUG_MODE:
+        if dpg.get_value("DEBUG"):
             dpg.configure_item("DEBUG_Y_perso", default_value=Position_perso.pos[1])
             dpg.configure_item("DEBUG_X_perso", default_value=Position_perso.pos[0])
         dpg.render_dearpygui_frame()
