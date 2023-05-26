@@ -4,102 +4,96 @@ import keyboard
 from math import sqrt
 from PIL import Image
 
-# Classes
-
-class labyrinthe:
-    """
-    Classe définissant un labirynthe
-    """
-    def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart, couleur_fond: tuple[int, int, int], elements_speciaux: list, histoire: str):
-        self.fond = fond
-        self.murs = murs
-        self.murs_data = Image.open("data/"+self.murs+".png")
-        self.width, self.height = self.murs_data.size
-        self.taille_personnage = taille_personnage
-        self.pos_depart = pos_depart
-        self.couleur_fond = couleur_fond
-        self.histoire = histoire
-        self.elements_speciaux = elements_speciaux
-
-    def est_mur(self, pos):
-        return self.murs_data.getpixel((pos[0]+self.taille_personnage//2, pos[1]+self.taille_personnage//2))[3] > 200
-
-class Special:
-    def __init__(self, type_elt: str, pos: list[int, int]):
-        self.type = type_elt
-        self.pos = pos
-
-    def effet(self, pos: tuple[int], labirynthe_i, LABYRINTHES):
-        if sqrt((pos[0]-self.pos[0])**2 + (pos[1]-self.pos[1])**2) <= 10:
-            if self.type == "PIECE":
-                PUZZLE.piece_trouvee()
-                LABYRINTHES[id_labyrinthe].elements_speciaux.pop(0)
-                dpg.configure_item("PIECE", show=False)
-                        
-            elif self.type == "PORTAIL_AVANT":
-                labirynthe_i(1)
-            elif self.type == "PORTAIL_ARRIERE":
-                dpg.configure_item("Personnage", pos=LABYRINTHES[id_labyrinthe-1].pos_depart)
-                labirynthe_i(-1)
-                
-class Puzzle:
-    def __init__(self, path: str):
-        self.path = path
-        self.image_actuelle = self.image_to_list()
-        self.pieces_totales = 4
-        self.pieces_trouvees = 0
-
-    def image_to_list(self):
-        """transforme un image, en une liste en 1 dimension"""
-
-        myimage = Image.open("data/"+self.path+".png")
-        self.width, self.height = myimage.size
-        return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
-
-    def rendre_invisible(self):
-        """Rend le puzzle invisble en mettant l'opacité à 0 de chaque pixel de la liste en 1D"""
-
-        for i in range(3, self.width*self.height*4, 4):
-            self.image_actuelle[i] = 0.0
-        dpg.set_value(self.path, self.image_actuelle)
-
-    def piece_trouvee(self):
-        """modifie l'image, afin de faire apparaitre un coin du puzzle"""
-        cote = round(self.width // sqrt(self.pieces_totales))
-        if self.pieces_trouvees == 0:
-            for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
-                for x in range(3+y, y+cote*4, 4):
-                    self.image_actuelle[x] = 1.0
-        elif self.pieces_trouvees == 1:
-            for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
-                for x in range(-3+y, y+cote*4, 4):
-                    self.image_actuelle[-x] = 1.0
-        elif self.pieces_trouvees == 2:
-            for y in [i*4 for i in range(cote*cote*2, cote*cote*4, cote*2)]:
-                for x in range(3+y, y+cote*4, 4):
-                    self.image_actuelle[x] = 1.0
-        elif self.pieces_trouvees == 3:
-            for y in [-i*4 for i in range(-cote*cote*2, -cote*cote*4, -cote*2)]:
-                for x in range(-3+y, y+cote*4, 4):
-                    self.image_actuelle[-x] = 1.0
-            
-        
-        self.pieces_trouvees += 1
-        dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
-        dpg.set_value(self.path, self.image_actuelle)
-
-        if self.pieces_trouvees == 4:
-            with dpg.window(label="victoire", width=1280, height=800, no_move=True, no_close=True, no_collapse=True, no_title_bar=True):
-                dpg.add_image("planete")
-            dpg.configure_item("puzzle", show=True)
-            
-
 def main():
- 
+    global id_labyrinthe
+
+    class labyrinthe:
+        """
+        Classe définissant un labirynthe
+        """
+        def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart, couleur_fond: tuple[int, int, int], elements_speciaux: list, histoire: str):
+            self.fond = fond
+            self.murs = murs
+            self.murs_data = Image.open("data/"+self.murs+".png")
+            self.width, self.height = self.murs_data.size
+            self.taille_personnage = taille_personnage
+            self.pos_depart = pos_depart
+            self.couleur_fond = couleur_fond
+            self.histoire = histoire
+            self.elements_speciaux = elements_speciaux
+
+        def est_mur(self, pos):
+            return self.murs_data.getpixel((pos[0]+self.taille_personnage//2, pos[1]+self.taille_personnage//2))[3] > 200
+
+    class Special:
+        def __init__(self, type_elt: str, pos: list[int, int]):
+            self.type = type_elt
+            self.pos = pos
+
+        def effet(self, pos: tuple[int]):
+            if sqrt((pos[0]-self.pos[0])**2 + (pos[1]-self.pos[1])**2) <= LABYRINTHES[id_labyrinthe].taille_personnage//2:
+                if self.type == "PIECE":
+                    PUZZLE.piece_trouvee()
+                    LABYRINTHES[id_labyrinthe].elements_speciaux.pop(0)
+                    dpg.configure_item("PIECE", show=False)
+                            
+                elif self.type == "PORTAIL_AVANT":
+                    labirynthe_i(1)
+                elif self.type == "PORTAIL_ARRIERE":
+                    labirynthe_i(-1)
+                    
+    class Puzzle:
+        def __init__(self, path: str):
+            self.path = path
+            self.image_actuelle = self.image_to_list()
+            self.pieces_totales = 4
+            self.pieces_trouvees = 0
+
+        def image_to_list(self):
+            """transforme un image, en une liste en 1 dimension"""
+
+            myimage = Image.open("data/"+self.path+".png")
+            self.width, self.height = myimage.size
+            return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
+
+        def rendre_invisible(self):
+            """Rend le puzzle invisble en mettant l'opacité à 0 de chaque pixel de la liste en 1D"""
+
+            for i in range(3, self.width*self.height*4, 4):
+                self.image_actuelle[i] = 0.0
+            dpg.set_value(self.path, self.image_actuelle)
+
+        def piece_trouvee(self):
+            """modifie l'image, afin de faire apparaitre un coin du puzzle"""
+            cote = round(self.width // sqrt(self.pieces_totales))
+            if self.pieces_trouvees == 0:
+                for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
+                    for x in range(3+y, y+cote*4, 4):
+                        self.image_actuelle[x] = 1.0
+            elif self.pieces_trouvees == 1:
+                for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
+                    for x in range(-3+y, y+cote*4, 4):
+                        self.image_actuelle[-x] = 1.0
+            elif self.pieces_trouvees == 2:
+                for y in [i*4 for i in range(cote*cote*2, cote*cote*4, cote*2)]:
+                    for x in range(3+y, y+cote*4, 4):
+                        self.image_actuelle[x] = 1.0
+            elif self.pieces_trouvees == 3:
+                for y in [-i*4 for i in range(-cote*cote*2, -cote*cote*4, -cote*2)]:
+                    for x in range(-3+y, y+cote*4, 4):
+                        self.image_actuelle[-x] = 1.0
+            self.pieces_trouvees += 1
+            dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
+            dpg.set_value(self.path, self.image_actuelle)
+
+            if self.pieces_trouvees == 4:
+                with dpg.window(label="victoire", width=1280, height=800, no_move=True, no_close=True, no_collapse=True, no_title_bar=True):
+                    dpg.add_image("planete")
+                dpg.configure_item("puzzle", show=True)
+
     class Position:
         def __init__(self):
             self.pos = [0, 0]
-            self.taille_ecran = min(ECRAN)
 
         def set_pos(self, position):
             self.pos = position
@@ -108,23 +102,19 @@ def main():
         def haut(self, vitesse):
             temp_pos = [self.pos[0], max(0, self.pos[1]-vitesse)]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos):
-                self.pos[1] = temp_pos[1]
-            return self.pos
+                self.set_pos(temp_pos)
         def bas(self, vitesse):
             temp_pos = [self.pos[0], min(700-LABYRINTHES[id_labyrinthe].taille_personnage, self.pos[1]+vitesse)]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos):
-                self.pos[1] = temp_pos[1]
-            return self.pos
+                self.set_pos(temp_pos)
         def gauche(self, vitesse):
             temp_pos = [max(0, self.pos[0]-vitesse), self.pos[1]]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos):
-                self.pos[0] = temp_pos[0]
-            return self.pos
+                self.set_pos(temp_pos)
         def droite(self, vitesse):
             temp_pos = [min(700-LABYRINTHES[id_labyrinthe].taille_personnage, self.pos[0]+vitesse), self.pos[1]]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos):
-                self.pos[0] = temp_pos[0]
-            return self.pos
+                self.set_pos(temp_pos)
 
     def viewport_load():
         dpg.create_context()
@@ -146,9 +136,6 @@ def main():
             id_labyrinthe = 0
         elif id_labyrinthe < 0:
             id_labyrinthe = len(LABYRINTHES)-1
-
-        for element in LABYRINTHES[id_labyrinthe].elements_speciaux:
-            dpg.configure_item(element.type, show=False)
 
         for element in LABYRINTHES[id_labyrinthe].elements_speciaux:
             dpg.configure_item(element.type, show=True, pos=element.pos, width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
@@ -240,7 +227,8 @@ def main():
             dpg.add_image("portail_arriere", tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
 
     ECRAN = [1280, 800]
-    global id_labyrinthe, DEBUG_MODE, PUZZLE, LABYRINTHES
+
+
     PUZZLE = Puzzle("puzzle/puzzle1")
     LABYRINTHES = [ 
         labyrinthe(40, "labirynthes/1", "fonds/plaine", [10, 20], (9, 74, 0),       [Special("PIECE", [580, 520]), Special("PORTAIL_AVANT", [210, 580])], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
@@ -262,19 +250,19 @@ def main():
 
         Vitesse = round(LABYRINTHES[id_labyrinthe].taille_personnage/20*VITESSE)
         if keyboard.is_pressed("down arrow"):
-            dpg.configure_item("Personnage", pos=Position_perso.bas(Vitesse))
+            Position_perso.bas(Vitesse)
         if keyboard.is_pressed("up arrow"):
-            dpg.configure_item("Personnage", pos=Position_perso.haut(Vitesse))
+            pos=Position_perso.haut(Vitesse)
         if keyboard.is_pressed("left arrow"):
-            dpg.configure_item("Personnage", pos=Position_perso.gauche(Vitesse))
+            Position_perso.gauche(Vitesse)
         if keyboard.is_pressed("right arrow"):
-            dpg.configure_item("Personnage", pos=Position_perso.droite(Vitesse))
+            Position_perso.droite(Vitesse)
 
         dpg.configure_item("DEBUG_Y_perso", default_value=Position_perso.pos[1])
         dpg.configure_item("DEBUG_X_perso", default_value=Position_perso.pos[0])
         
         for element in LABYRINTHES[id_labyrinthe].elements_speciaux:
-                element.effet(Position_perso.pos, labirynthe_i, LABYRINTHES)
+                element.effet(Position_perso.pos)
 
         dpg.render_dearpygui_frame()
 
