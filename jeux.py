@@ -1,11 +1,13 @@
 import dearpygui.dearpygui as dpg
-import os
 import keyboard
 from math import sqrt
 from PIL import Image
 
+global id_labyrinthe
+
+id_labyrinthe = 0
+
 def main():
-    global id_labyrinthe
 
     class labyrinthe:
         """
@@ -17,6 +19,7 @@ def main():
             self.murs_data = Image.open("data/"+self.murs+".png")
             self.width, self.height = self.murs_data.size
             self.taille_personnage = taille_personnage
+            self.vitesse = round(self.taille_personnage/15)
             self.pos_depart = pos_depart
             self.couleur_fond = couleur_fond
             self.histoire = histoire
@@ -65,7 +68,10 @@ def main():
 
         def piece_trouvee(self):
             """modifie l'image, afin de faire apparaitre un coin du puzzle"""
+            # TODO améliorer ce truc car c'est moche
+
             cote = round(self.width // sqrt(self.pieces_totales))
+
             if self.pieces_trouvees == 0:
                 for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
                     for x in range(3+y, y+cote*4, 4):
@@ -227,8 +233,6 @@ def main():
             dpg.add_image("portail_arriere", tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
 
     ECRAN = [1280, 800]
-
-
     PUZZLE = Puzzle("puzzle/puzzle1")
     LABYRINTHES = [ 
         labyrinthe(40, "labirynthes/1", "fonds/plaine", [10, 20], (9, 74, 0),       [Special("PIECE", [580, 520]), Special("PORTAIL_AVANT", [210, 580])], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
@@ -236,8 +240,7 @@ def main():
         labyrinthe(20, "labirynthes/3", "fonds/nuages", [365, 35], (122, 214, 235), [Special("PIECE", [340, 340]), Special("PORTAIL_AVANT", [535, 580]), Special("PORTAIL_ARRIERE", [580, 535])], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
         labyrinthe(30, "labirynthes/4", "fonds/lave",   [290, 70], (117, 1, 1),     [Special("PIECE", [480, 70]) , Special("PORTAIL_ARRIERE", [380, 570])], "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
-    VITESSE = 3    
-    id_labyrinthe = 0
+                    
     viewport_load()
     Position_perso = Position()
     interface()
@@ -247,16 +250,14 @@ def main():
 
     while dpg.is_dearpygui_running():
 
-
-        Vitesse = round(LABYRINTHES[id_labyrinthe].taille_personnage/20*VITESSE)
         if keyboard.is_pressed("down arrow"):
-            Position_perso.bas(Vitesse)
+            Position_perso.bas(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("up arrow"):
-            pos=Position_perso.haut(Vitesse)
+            pos=Position_perso.haut(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("left arrow"):
-            Position_perso.gauche(Vitesse)
+            Position_perso.gauche(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("right arrow"):
-            Position_perso.droite(Vitesse)
+            Position_perso.droite(LABYRINTHES[id_labyrinthe].vitesse)
 
         dpg.configure_item("DEBUG_Y_perso", default_value=Position_perso.pos[1])
         dpg.configure_item("DEBUG_X_perso", default_value=Position_perso.pos[0])
