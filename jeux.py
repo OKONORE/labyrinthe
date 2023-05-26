@@ -146,6 +146,7 @@ def main():
             id_labyrinthe = 0
         elif id_labyrinthe < 0:
             id_labyrinthe = len(LABYRINTHES)-1
+
         for element in LABYRINTHES[id_labyrinthe].elements_speciaux:
             dpg.configure_item(element.type, show=False)
 
