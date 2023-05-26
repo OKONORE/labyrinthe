@@ -26,6 +26,7 @@ def main():
             self.elements_speciaux = elements_speciaux
 
         def est_mur(self, pos):
+            "vérifie si l'opacité du pixel demandé est > à 200"
             return self.murs_data.getpixel((pos[0]+self.taille_personnage//2, pos[1]+self.taille_personnage//2))[3] > 200
 
     class Special:
@@ -34,6 +35,7 @@ def main():
             self.pos = pos
 
         def effet(self, pos: tuple[int]):
+            """Lance l'action de l'élement spécial"""
             if sqrt((pos[0]-self.pos[0])**2 + (pos[1]-self.pos[1])**2) <= LABYRINTHES[id_labyrinthe].taille_personnage//2:
                 if self.type == "PIECE":
                     PUZZLE.piece_trouvee()
@@ -72,8 +74,6 @@ def main():
 
             cote = round(self.width // sqrt(self.pieces_totales))
 
-
-
             if self.pieces_trouvees == 0:
                 for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
                     for x in range(3+y, y+cote*4, 4):
@@ -104,8 +104,9 @@ def main():
             self.pos = [0, 0]
 
         def set_pos(self, position):
+            "Définie la position du félix"
             self.pos = position
-            dpg.configure_item("Personnage", pos=self.pos)
+            dpg.configure_item("Félix", pos=self.pos)
 
         def haut(self, vitesse):
             temp_pos = [self.pos[0], max(0, self.pos[1]-vitesse)]
@@ -127,7 +128,7 @@ def main():
     def viewport_load():
         dpg.create_context()
         dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
-        dpg.set_viewport_large_icon("data/personnage.png")
+        dpg.set_viewport_large_icon("data/félix.png")
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
@@ -150,7 +151,7 @@ def main():
 
         Position_perso.set_pos(LABYRINTHES[id_labyrinthe].pos_depart)
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
-        dpg.configure_item("Personnage", width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
+        dpg.configure_item("Félix", width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
         dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
         dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
@@ -161,7 +162,7 @@ def main():
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
             for image in [ 
-                "personnage", "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
+                "félix", "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
                 "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                 "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                         ]:
@@ -212,7 +213,7 @@ def main():
         with dpg.window(tag="fenetre_tuto", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
                         pos=(ECRAN[0]-530, ECRAN[1]-330), width=500):
             with dpg.group(horizontal=True):
-                for image, phrase in [("piece", "C'est une pièce de la carte, trouvez la"), ("portail_avant", "C'est un portail, il vous emmenera a un autre niveau") , ("personnage", "C'est vous, felix"), ("fleches", "Utilisez les flèches pour vous déplacer")]:
+                for image, phrase in [("piece", "C'est une pièce de la carte, trouvez la"), ("portail_avant", "C'est un portail, il vous emmenera a un autre niveau") , ("félix", "C'est vous, felix"), ("fleches", "Utilisez les flèches pour vous déplacer")]:
                     with dpg.group():
                         dpg.add_image(image, tag=image+"_tuto", width=95, height=95)
                         dpg.add_text(wrap=80, default_value=phrase)
@@ -235,7 +236,7 @@ def main():
                         no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
             dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
             dpg.add_image(LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
-            dpg.add_image("personnage", tag="Personnage", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+            dpg.add_image("félix", tag="Félix", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("piece", tag="PIECE", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("portail_avant", tag="PORTAIL_AVANT", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("portail_arriere", tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
