@@ -1,0 +1,5 @@
+pip install --upgrade pip setuptools &&
+pip install dearpygui &&
+pip install keyboard &&
+sudo apt-get install -y python3-dev libasound2-dev &&
+pip install simpleaudio

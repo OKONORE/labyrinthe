@@ -1,9 +1,10 @@
 import dearpygui.dearpygui as dpg
 import os
 import keyboard
-import array
 from math import sqrt
 from PIL import Image
+import simpleaudio as sa
+import wave
 
 # Classes
 
@@ -84,6 +85,7 @@ class Puzzle:
                 for x in range(-3+y, y+cote*4, 4):
                     self.image_actuelle[-x] = 1.0
             
+        
         self.pieces_trouvees += 1
         dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
         dpg.set_value(self.path, self.image_actuelle)
