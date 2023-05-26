@@ -72,6 +72,8 @@ def main():
 
             cote = round(self.width // sqrt(self.pieces_totales))
 
+
+
             if self.pieces_trouvees == 0:
                 for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
                     for x in range(3+y, y+cote*4, 4):
@@ -178,6 +180,7 @@ def main():
                         no_background=True, no_title_bar=True, pos=(20, 10)):
             dpg.add_button(tag="compteur", label="Pièces obtenues: " + str(PUZZLE.pieces_trouvees)+"/"+str(PUZZLE.pieces_totales), width= 700)
             with dpg.group(horizontal=True):
+                dpg.add_button(show=True, label="Crédits", tag="Crédits", callback=lambda: dpg.configure_item("fenetre_credits", show=True))
                 dpg.add_checkbox(label="Puzzle", tag="Afficher_puzzle", callback= lambda: dpg.configure_item("puzzle", show=dpg.get_value("Afficher_puzzle")))
                 
                 def debug_mode(sender, app_data):
@@ -220,6 +223,11 @@ def main():
         with dpg.window(tag="fenetre_quitter", no_title_bar=True, no_move=True, no_background=True,
                         pos=(ECRAN[0]-537, ECRAN[1] - 130), autosize=True):
             dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=90, callback=dpg.stop_dearpygui)
+        
+        # Fenetre Crédits
+
+        with dpg.window(tag="fenetre_credits", pos=(ECRAN[0]//2, ECRAN[1]//2), autosize=True, show=False):
+            dpg.add_text(tag="text_credits", default_value="""Mathieu THOS\nClémentine GHOSN\nElias PUJOL-HERING\nAntonin SIDHOUM""", wrap = 300)
 
         # Fenetre principale
 
@@ -237,7 +245,7 @@ def main():
     LABYRINTHES = [ 
         labyrinthe(40, "labirynthes/1", "fonds/plaine", [10, 20], (9, 74, 0),       [Special("PIECE", [580, 520]), Special("PORTAIL_AVANT", [210, 580])], "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
         labyrinthe(50, "labirynthes/2", "fonds/desert", [60, 60],  (219, 76, 33),   [Special("PIECE", [320, 330]), Special("PORTAIL_AVANT", [190, 600]), Special("PORTAIL_ARRIERE", [460, 600])], "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe(20, "labirynthes/3", "fonds/nuages", [365, 35], (122, 214, 235), [Special("PIECE", [340, 340]), Special("PORTAIL_AVANT", [535, 580]), Special("PORTAIL_ARRIERE", [580, 535])], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe(40, "labirynthes/3", "fonds/nuages", [365, 20], (122, 214, 235), [Special("PIECE", [330, 330]), Special("PORTAIL_AVANT", [20, 360]), Special("PORTAIL_ARRIERE", [570, 520])], "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
         labyrinthe(30, "labirynthes/4", "fonds/lave",   [290, 70], (117, 1, 1),     [Special("PIECE", [480, 70]) , Special("PORTAIL_ARRIERE", [380, 570])], "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Félix devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                     ]
                     
