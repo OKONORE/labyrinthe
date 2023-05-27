@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 import keyboard
 from math import sqrt
 from PIL import Image
+import os
 
 global id_labyrinthe
 
@@ -166,7 +167,7 @@ def main():
                 "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                 "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                         ]:
-                width, height, channels, data = [elt for elt in dpg.load_image("data/"+image+".png")]
+                width, height, channels, data = [elt for elt in dpg.load_image(os.path.join("data", image+".png"))]
                 dpg.add_static_texture(width=width, height=height, default_value=data, tag=image)
             dpg.add_dynamic_texture(width=PUZZLE.width, height=PUZZLE.height, default_value=PUZZLE.image_actuelle, tag=PUZZLE.path)
             PUZZLE.rendre_invisible()
