@@ -105,7 +105,7 @@ def main():
             self.pos = [0, 0]
 
         def set_pos(self, position):
-            "Définie la position du félix"
+            "Définie la position du felix"
             self.pos = position
             dpg.configure_item("Félix", pos=self.pos)
 
@@ -129,7 +129,7 @@ def main():
     def viewport_load():
         dpg.create_context()
         dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
-        dpg.set_viewport_large_icon(os.path.join("data", "félix.png"))
+        dpg.set_viewport_large_icon(os.path.join("data", "felix.png"))
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
@@ -163,7 +163,7 @@ def main():
         # chargement des textures
         with dpg.texture_registry(show=False): # registre des textures chargées
             for image in [ 
-                "félix", "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
+                "felix", "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
                 "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                 "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                         ]:
@@ -214,7 +214,7 @@ def main():
         with dpg.window(tag="fenetre_tuto", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
                         pos=(ECRAN[0]-530, ECRAN[1]-330), width=500):
             with dpg.group(horizontal=True):
-                for image, phrase in [("piece", "C'est une pièce de la carte, trouvez la"), ("portail_avant", "C'est un portail, il vous emmenera a un autre niveau") , ("félix", "C'est vous, felix"), ("fleches", "Utilisez les flèches pour vous déplacer")]:
+                for image, phrase in [("piece", "C'est une pièce de la carte, trouvez la"), ("portail_avant", "C'est un portail, il vous emmenera a un autre niveau") , ("felix", "C'est vous, felix"), ("fleches", "Utilisez les flèches pour vous déplacer")]:
                     with dpg.group():
                         dpg.add_image(image, tag=image+"_tuto", width=95, height=95)
                         dpg.add_text(wrap=80, default_value=phrase)
@@ -237,7 +237,7 @@ def main():
                         no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
             dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
             dpg.add_image(LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
-            dpg.add_image("félix", tag="Félix", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+            dpg.add_image("felix", tag="Félix", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("piece", tag="PIECE", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("portail_avant", tag="PORTAIL_AVANT", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
             dpg.add_image("portail_arriere", tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
