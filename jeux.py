@@ -58,7 +58,7 @@ def main():
         def image_to_list(self):
             """transforme un image, en une liste en 1 dimension"""
 
-            myimage = Image.open("data/"+self.path+".png")
+            myimage = Image.open(os.path.join("data", self.path+".png"))
             self.width, self.height = myimage.size
             return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
 
@@ -76,21 +76,21 @@ def main():
             cote = round(self.width // sqrt(self.pieces_totales))
 
             if self.pieces_trouvees == 0:
-                for y in [i*4 for i in range(0, cote*cote*2, cote*2)]:
+                for y in [i*4 for i in range((cote*cote*2)*(self.pieces_trouvees//2), cote*cote*(self.pieces_trouvees//2*2+2), cote*2)]:
                     for x in range(3+y, y+cote*4, 4):
                         self.image_actuelle[x] = 1.0
             elif self.pieces_trouvees == 1:
-                for y in [-i*4 for i in range(0, -cote*cote*2, -cote*2)]:
+                for y in [-i*4 for i in range((cote*cote*2)*(self.pieces_trouvees//2), -cote*cote*(self.pieces_trouvees//2*2+2), -cote*2)]:
                     for x in range(-3+y, y+cote*4, 4):
                         self.image_actuelle[-x] = 1.0
             elif self.pieces_trouvees == 2:
-                for y in [i*4 for i in range(cote*cote*2, cote*cote*4, cote*2)]:
+                for y in [i*4 for i in range((cote*cote*2)*(self.pieces_trouvees//2), cote*cote*(self.pieces_trouvees//2*2+2), cote*2)]:
                     for x in range(3+y, y+cote*4, 4):
                         self.image_actuelle[x] = 1.0
             elif self.pieces_trouvees == 3:
-                for y in [-i*4 for i in range(-cote*cote*2, -cote*cote*4, -cote*2)]:
-                    for x in range(-3+y, y+cote*4, 4):
-                        self.image_actuelle[-x] = 1.0
+                for y in [-i*4 for i in range((cote*cote*2)*(self.pieces_trouvees//2), -cote*cote*(self.pieces_trouvees//2*2+2), -cote*2)]:
+                    for x in range(3+y, y+cote*4, 4):
+                        self.image_actuelle[x] = 1.0
             self.pieces_trouvees += 1
             dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
             dpg.set_value(self.path, self.image_actuelle)
@@ -129,7 +129,7 @@ def main():
     def viewport_load():
         dpg.create_context()
         dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
-        dpg.set_viewport_large_icon("data/félix.png")
+        dpg.set_viewport_large_icon(os.path.join("data", "félix.png"))
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
