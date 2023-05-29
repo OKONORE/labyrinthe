@@ -135,7 +135,7 @@ def main():
             if not LABYRINTHES[id_labyrinthe].elements[element] is None:
                 dpg.configure_item(element, show=True, pos=LABYRINTHES[id_labyrinthe].elements[element], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
 
-        Personnage.set_pos(LABYRINTHES[id_labyrinthe].pos_depart)
+        personnage.set_pos(LABYRINTHES[id_labyrinthe].pos_depart)
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
         dpg.configure_item("Personnage", width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
         dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
@@ -148,7 +148,7 @@ def main():
         def textures(): # Charges les textures nécéssaires
             with dpg.texture_registry(show=False):
                 for image in [ 
-                    Personnage.image, "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
+                    personnage.image, "logo", "piece", "portail_avant", "portail_arriere", "fleches", "planete",
                     "fonds/nuages", "fonds/lave", "fonds/desert", "fonds/plaine",
                     "labirynthes/1", "labirynthes/2", "labirynthes/3", "labirynthes/4",
                             ]:
@@ -180,8 +180,8 @@ def main():
                     dpg.add_button(show=False, label="PUZZLE + 1", tag="DEBUG_PUZZLE", callback= PUZZLE.piece_trouvee)
                     dpg.add_checkbox(show=False, label="Fantôme", tag="DEBUG_FANTÔME", default_value= False)
                     
-                    dpg.add_input_int(show=False, tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
-                    dpg.add_input_int(show=False, tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: Personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))           
+                    dpg.add_input_int(show=False, tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
+                    dpg.add_input_int(show=False, tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))           
 
         def histoire(): # Fenetre d'histoire
             with dpg.window(label="L'histoire du labirynthe Cosmique", tag="histoire", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True,
@@ -239,7 +239,7 @@ def main():
     PUZZLE = [Puzzle("puzzle/puzzle1")][0]
     
     viewport_load()
-    Personnage = Personnage("felix")
+    personnage = Personnage("felix")
     interface()
     labirynthe_i(id_labyrinthe)
 
@@ -248,20 +248,20 @@ def main():
     while dpg.is_dearpygui_running():
 
         if keyboard.is_pressed("down arrow"):
-            Personnage.bas(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.bas(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("up arrow"):
-            pos=Personnage.haut(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.haut(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("left arrow"):
-            Personnage.gauche(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.gauche(LABYRINTHES[id_labyrinthe].vitesse)
         if keyboard.is_pressed("right arrow"):
-            Personnage.droite(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.droite(LABYRINTHES[id_labyrinthe].vitesse)
 
-        dpg.configure_item("DEBUG_Y_perso", default_value=Personnage.pos[1])
-        dpg.configure_item("DEBUG_X_perso", default_value=Personnage.pos[0])
+        dpg.configure_item("DEBUG_Y_perso", default_value=personnage.pos[1])
+        dpg.configure_item("DEBUG_X_perso", default_value=personnage.pos[0])
         
         for element in LABYRINTHES[id_labyrinthe].elements:
             if not LABYRINTHES[id_labyrinthe].elements[element] is None:
-                if est_proche(Personnage.pos, LABYRINTHES[id_labyrinthe].elements[element]):
+                if est_proche(personnage.pos, LABYRINTHES[id_labyrinthe].elements[element]):
                     LABYRINTHES[id_labyrinthe].lancer(element)
 
         dpg.render_dearpygui_frame()
