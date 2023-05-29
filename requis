@@ -1,3 +1,4 @@
 pip install --upgrade pip setuptools &&
 pip install dearpygui &&
 pip install keyboard
+pip install webbrowser

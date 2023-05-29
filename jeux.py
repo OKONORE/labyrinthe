@@ -3,6 +3,7 @@ import keyboard
 from math import sqrt
 from PIL import Image
 import os
+import webbrowser
 
 global id_labyrinthe
 
@@ -208,7 +209,9 @@ def main():
                 dpg.add_button(tag="QUITTER", label="QUITTER LE JEU", width=500, height=90, callback=dpg.stop_dearpygui)
         
         def credits():# Fenetre Crédits
-            with dpg.window(tag="fenetre_credits", pos=(ECRAN[0]//2, ECRAN[1]//2), autosize=True, show=False):
+            with dpg.window(tag="fenetre_credits", pos=(ECRAN[0]//2, ECRAN[1]//2), autosize=True, show=False, no_scrollbar=True, no_collapse=True):
+                dpg.add_button(label="github.com/OKONORE/labyrinthe", tag="github", callback=lambda:webbrowser.open("https://github.com/OKONORE/labyrinthe"))
+                dpg.bind_item_theme("github", "__demo_hyperlinkTheme")
                 dpg.add_text(tag="text_credits", default_value="""Mathieu THOS\nClémentine GHOSN\nElias PUJOL-HERING\nAntonin SIDHOUM""", wrap = 300)
 
         def principale(): # Fenetre principale
@@ -261,9 +264,8 @@ def main():
                 if est_proche(Position_perso.pos, LABYRINTHES[id_labyrinthe].elements[element]):
                     LABYRINTHES[id_labyrinthe].lancer(element)
 
-
         dpg.render_dearpygui_frame()
-
+        
     dpg.destroy_context()
 
 main()
