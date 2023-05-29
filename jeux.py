@@ -5,8 +5,6 @@ from PIL import Image
 import os
 import webbrowser
 
-global id_labyrinthe
-
 id_labyrinthe = 0
 
 def main():
@@ -119,9 +117,9 @@ def main():
 
     def labirynthe_i(i):
         """change les interfaces pour faire apparraitre le labyrinthe i"""
-
+        
         global id_labyrinthe
-
+        
         for element in LABYRINTHES[id_labyrinthe].elements:
             dpg.configure_item(element, show=False)
 
