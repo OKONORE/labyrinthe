@@ -124,6 +124,7 @@ def main():
             dpg.configure_item(element, show=False)
 
         id_labyrinthe += i
+
         if id_labyrinthe >= len(LABYRINTHES):
             id_labyrinthe = 0
         elif id_labyrinthe < 0:
