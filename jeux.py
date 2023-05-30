@@ -13,10 +13,12 @@ def main():
         """
         Classe définissant un labirynthe
         """
-        def __init__(self, taille_personnage: float, murs: str, fond: str, pos_depart, couleur_fond: tuple[int, int, int], elements: dict[tuple, tuple, tuple], histoire: str):
+        def __init__(   self, taille_personnage: float, murs: str, fond: str, 
+                        pos_depart, couleur_fond: tuple[int, int, int], 
+                        elements: dict[tuple, tuple, tuple], histoire: str):
             self.fond = fond
             self.murs = murs
-            self.murs_data = Image.open("data/"+self.murs+".png")
+            self.murs_data = Image.open(os.path.join("data", self.murs+".png"))
             self.width, self.height = self.murs_data.size
             self.taille_personnage = taille_personnage
             self.vitesse = round(self.taille_personnage/15)
@@ -27,7 +29,10 @@ def main():
 
         def est_mur(self, pos):
             "vérifie si l'opacité du pixel demandé est > à 200"
-            return self.murs_data.getpixel((pos[0]+self.taille_personnage//2, pos[1]+self.taille_personnage//2))[3] > 200
+            x, y = pos
+            return self.murs_data.getpixel((
+                x + self.taille_personnage // 2, 
+                y + self.taille_personnage // 2))[3] > 200
 
         def lancer(self, element):
             """Lance l'action de l'element"""
@@ -45,7 +50,10 @@ def main():
         def __init__(self, path: str):
             self.path = path
             self.image_actuelle = self.image_to_list()
-            self.pieces_totales = sum([element == "PIECE" for laby in LABYRINTHES for element in laby.elements])
+            self.pieces_totales = sum([
+                element == "PIECE" 
+                for laby in LABYRINTHES 
+                for element in laby.elements])
             self.pieces_trouvees = 0
             self.cote_piece = self.width // self.pieces_totales
 
@@ -53,23 +61,29 @@ def main():
             """transforme un image, en une liste en 1 dimension"""
             myimage = Image.open(os.path.join("data", self.path+".png"))
             self.width, self.height = myimage.size
-            return [element/255 for y in range(self.width) for x in range(self.height) for element in myimage.getpixel((x, y))]
+            return [element/255 
+                    for y in range(self.width) 
+                    for x in range(self.height) 
+                    for element in myimage.getpixel((x, y))]
 
         def rendre_invisible(self):
-            """Rend le puzzle invisble en mettant l'opacité à 0 de chaque pixel de la liste en 1D"""
+            """Rend le puzzle invisble en mettant l'opacité à 0 de chaque 
+            pixel de la liste en 1D"""
 
-            for i in range(3, self.width*self.height*4, 4):
-                self.image_actuelle[i] = 0.0
+            for i in range(self.width*self.height):
+                self.image_actuelle[3+i*4] = 0.0
             dpg.set_value(self.path, self.image_actuelle)
 
         def piece_trouvee(self):
             """modifie l'image, afin de faire apparaitre une piece du puzzle"""
 
-            for i in range(3+self.width*self.height*4//self.pieces_totales*self.pieces_trouvees, self.width*self.height*4//self.pieces_totales*(self.pieces_trouvees+1), 4):
-                self.image_actuelle[i] = 1.0
+            for i in range(
+                self.width*self.height//self.pieces_totales*self.pieces_trouvees, 
+                self.width*self.height//self.pieces_totales*(self.pieces_trouvees+1)):
+                self.image_actuelle[3+i*4] = 1.0
 
             self.pieces_trouvees += 1
-            dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees)+"/"+str(self.pieces_totales))
+            dpg.configure_item("compteur", label="Pièces obtenues: " + str(self.pieces_trouvees) + "/" + str(self.pieces_totales))
             dpg.set_value(self.path, self.image_actuelle)
 
             if self.pieces_trouvees == self.pieces_totales:
@@ -83,24 +97,15 @@ def main():
             self.image = image
 
         def set_pos(self, position):
-            "Définie la position du felix"
+            """Définie la position de felix"""
             self.pos = position
             dpg.configure_item("Personnage", pos=self.pos)
 
-        def haut(self, vitesse):
-            temp_pos = [self.pos[0], max(0, self.pos[1]-vitesse)]
-            if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
-                self.set_pos(temp_pos)
-        def bas(self, vitesse):
-            temp_pos = [self.pos[0], min(700-LABYRINTHES[id_labyrinthe].taille_personnage, self.pos[1]+vitesse)]
-            if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
-                self.set_pos(temp_pos)
-        def gauche(self, vitesse):
-            temp_pos = [max(0, self.pos[0]-vitesse), self.pos[1]]
-            if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
-                self.set_pos(temp_pos)
-        def droite(self, vitesse):
-            temp_pos = [min(700-LABYRINTHES[id_labyrinthe].taille_personnage, self.pos[0]+vitesse), self.pos[1]]
+        def deplacer(self, mouvement):
+            x, y = self.pos
+            x_1, y_2 = mouvement
+            temp_pos = [max(min(x+x_1, 700-LABYRINTHES[id_labyrinthe].taille_personnage), 0), 
+                        max(min(y+y_2, 700-LABYRINTHES[id_labyrinthe].taille_personnage), 0)]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
                 self.set_pos(temp_pos)
 
@@ -111,9 +116,13 @@ def main():
         dpg.setup_dearpygui()
         dpg.show_viewport()
 
-    def est_proche(pos_1, pos_2):
-        return sqrt((pos_1[0]-pos_2[0])**2 + (pos_1[1]-pos_2[1])**2) <= LABYRINTHES[id_labyrinthe].taille_personnage//2
+    def distance(pos_1, pos_2):
+        x, y = pos_1
+        x_1, y_2 = pos_2
+        return sqrt((x-x_1)**2 + (y-y_2)**2)
 
+    def est_proche(pos_1, pos_2):
+        return distance(pos_1, pos_2) <= LABYRINTHES[id_labyrinthe].taille_personnage//2
 
     def labirynthe_i(i):
         """change les interfaces pour faire apparraitre le labyrinthe i"""
@@ -178,7 +187,6 @@ def main():
                     dpg.add_button(show=False, label="SUIVANT", tag="DEBUG_SUIVANT", callback= lambda: labirynthe_i(1))
                     dpg.add_button(show=False, label="PUZZLE + 1", tag="DEBUG_PUZZLE", callback= PUZZLE.piece_trouvee)
                     dpg.add_checkbox(show=False, label="Fantôme", tag="DEBUG_FANTÔME", default_value= False)
-                    
                     dpg.add_input_int(show=False, tag="DEBUG_X_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))
                     dpg.add_input_int(show=False, tag="DEBUG_Y_perso", width=30, default_value=0, step=0, on_enter=True, callback=lambda: personnage.set_pos([dpg.get_value("DEBUG_X_perso"), dpg.get_value("DEBUG_Y_perso")]))           
 
@@ -247,13 +255,13 @@ def main():
     while dpg.is_dearpygui_running():
 
         if keyboard.is_pressed("down arrow"):
-            personnage.bas(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.deplacer([0, LABYRINTHES[id_labyrinthe].vitesse])
         if keyboard.is_pressed("up arrow"):
-            personnage.haut(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.deplacer([0, -LABYRINTHES[id_labyrinthe].vitesse])
         if keyboard.is_pressed("left arrow"):
-            personnage.gauche(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.deplacer([-LABYRINTHES[id_labyrinthe].vitesse, 0])
         if keyboard.is_pressed("right arrow"):
-            personnage.droite(LABYRINTHES[id_labyrinthe].vitesse)
+            personnage.deplacer([LABYRINTHES[id_labyrinthe].vitesse, 0])
 
         dpg.configure_item("DEBUG_Y_perso", default_value=personnage.pos[1])
         dpg.configure_item("DEBUG_X_perso", default_value=personnage.pos[0])
