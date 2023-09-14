@@ -268,7 +268,6 @@ def main():
         dpg.configure_item("DEBUG_X_perso", default_value=COMPOSANTS["personnage"].pos[0])
         
         for composant in COMPOSANTS:
-            
             if composant != "personnage" and composant in LABIRYNTHES[1][LABIRYNTHES[0]].elements and est_proche(COMPOSANTS["personnage"].pos, COMPOSANTS[composant].pos):
                 COMPOSANTS[composant].lancer(composant)
 
