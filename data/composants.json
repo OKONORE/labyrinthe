@@ -1,0 +1,31 @@
+{
+    "personnage": {
+            "image": "felix.png", 
+            "tutoriel": true, 
+            "description": "C'est vous, felix"},
+    "logo": {
+            "image": "logo.png", 
+            "tutoriel": false, 
+            "description": "C'est le logo"},
+    "piece": {
+            "image": "piece.png", 
+            "tutoriel": true, 
+            "description": "C'est une pièce de la carte, trouvez la"},
+    "portail_avant": {
+            "image": "portail_avant.png", 
+            "tutoriel": true, 
+            "description": "C'est un portail, il vous emmenera a un autre niveau"},
+    "portail_arriere": {
+            "image": "portail_arriere.png", 
+            "tutoriel": false, 
+            "description": "C'est un portail, il vous emmenera a un autre niveau"},
+    "fleches": {
+            "image": "fleches.png", 
+            "tutoriel": true, 
+            "description": "Utilisez les flèches pour vous déplacer"},
+    "planete": {
+            "image": "planete.png", 
+            "tutoriel": false, 
+            "description": "Vous avez fuit la planète maudite"}
+
+}

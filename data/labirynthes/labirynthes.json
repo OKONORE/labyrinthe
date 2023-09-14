@@ -1,0 +1,46 @@
+{
+    "plaine": {
+        "taille_personnage": 40, 
+        "couleur_fond": [9, 74, 0], 
+        "elements": {
+            "personnage":       [10, 20],
+            "piece":            [580, 520],
+            "portail_avant":    [210, 580],
+            "portail_arriere":  [70, 205]
+        },
+        "histoire": "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."
+    },
+    "desert": {
+        "taille_personnage": 50, 
+        "couleur_fond": [219, 76, 33], 
+        "elements": {
+            "personnage":       [60, 60],
+            "piece":            [320, 330],
+            "portail_avant":    [190, 600],
+            "portail_arriere":  [460, 600]
+        },
+        "histoire": "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "
+    },
+    "nuages": {
+        "taille_personnage": 40, 
+        "couleur_fond": [122, 214, 235], 
+        "elements": {
+            "personnage":       [365, 20],
+            "piece":            [330, 330],
+            "portail_avant":    [20, 360],
+            "portail_arriere":  [570, 520]
+        },
+        "histoire": "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "
+    },
+    "lave": {
+        "taille_personnage": 30, 
+        "couleur_fond": [117, 1, 1], 
+        "elements": {
+            "personnage":       [290, 70],
+            "piece":            [480, 70],
+            "portail_avant":    [90, 240],
+            "portail_arriere":  [380, 570]
+        },
+        "histoire": "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."
+    }
+}

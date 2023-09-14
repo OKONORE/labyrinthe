@@ -3,7 +3,7 @@ import keyboard
 from math import sqrt
 from PIL import Image
 import os
-import webbrowser
+import json
 
 def main():
 
@@ -37,7 +37,7 @@ def main():
             self.image_actuelle = self.image_to_list()
             self.pieces_totales = sum([
                 element == "piece" 
-                for laby in LABYRINTHES[1] 
+                for laby in LABIRYNTHES[1] 
                 for element in laby.elements])
             self.pieces_trouvees = 0
             self.cote_piece = self.width // self.pieces_totales
@@ -91,16 +91,16 @@ def main():
         def deplacer(self, mouvement):
             x, y = self.pos
             x_1, y_2 = mouvement
-            temp_pos = [max(min(x+x_1, 700-LABYRINTHES[1][LABYRINTHES[0]].taille_personnage), 0), 
-                        max(min(y+y_2, 700-LABYRINTHES[1][LABYRINTHES[0]].taille_personnage), 0)]
-            if not LABYRINTHES[1][LABYRINTHES[0]].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
+            temp_pos = [max(min(x+x_1, 700-LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage), 0), 
+                        max(min(y+y_2, 700-LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage), 0)]
+            if not LABIRYNTHES[1][LABIRYNTHES[0]].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
                 self.set_pos(temp_pos)
 
         def lancer(self, element):
             """Lance l'action de l'element"""
             if element == "piece":
                 PUZZLE.piece_trouvee()
-                LABYRINTHES[1][LABYRINTHES[0]].elements.pop(element)
+                LABIRYNTHES[1][LABIRYNTHES[0]].elements.pop(element)
                 dpg.configure_item("piece.png", show=False)
 
             elif element == "portail_avant":
@@ -122,37 +122,35 @@ def main():
         return sqrt((x-x_1)**2 + (y-y_2)**2)
 
     def est_proche(pos_1, pos_2):
-        return distance(pos_1, pos_2) <= LABYRINTHES[1][LABYRINTHES[0]].taille_personnage//2
+        return distance(pos_1, pos_2) <= LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage//2
 
     def labirynthe_i(i):
         """change les interfaces pour faire apparraitre le labyrinthe i"""
         
-        LABYRINTHES[0] += i
-        if LABYRINTHES[0] < 0:
-            LABYRINTHES[0] = len(LABYRINTHES[1])-1
-        elif LABYRINTHES[0] > len(LABYRINTHES[1])-1:
-            LABYRINTHES[0] = 0
-
-        print(LABYRINTHES[0])
+        LABIRYNTHES[0] += i
+        if LABIRYNTHES[0] < 0:
+            LABIRYNTHES[0] = len(LABIRYNTHES[1])-1
+        elif LABIRYNTHES[0] > len(LABIRYNTHES[1])-1:
+            LABIRYNTHES[0] = 0
         
         for composant in COMPOSANTS:
-            if composant in LABYRINTHES[1][LABYRINTHES[0]].elements:
-                COMPOSANTS[composant].set_pos(LABYRINTHES[1][LABYRINTHES[0]].elements[composant])
-                dpg.configure_item(COMPOSANTS[composant].image, show=True, width=LABYRINTHES[1][LABYRINTHES[0]].taille_personnage, height=LABYRINTHES[1][LABYRINTHES[0]].taille_personnage)
+            if composant in LABIRYNTHES[1][LABIRYNTHES[0]].elements:
+                COMPOSANTS[composant].set_pos(LABIRYNTHES[1][LABIRYNTHES[0]].elements[composant])
+                dpg.configure_item(COMPOSANTS[composant].image, show=True, width=LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage, height=LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage)
             else:
                 dpg.configure_item(COMPOSANTS[composant].image, show=False)
 
-        dpg.set_viewport_clear_color(LABYRINTHES[1][LABYRINTHES[0]].couleur_fond)
-        dpg.configure_item("fond", texture_tag="texture_"+LABYRINTHES[1][LABYRINTHES[0]].fond)
-        dpg.configure_item("murs", texture_tag="texture_"+LABYRINTHES[1][LABYRINTHES[0]].murs)
-        dpg.configure_item("histoire_l", default_value="texture_"+LABYRINTHES[1][LABYRINTHES[0]].histoire)
+        dpg.set_viewport_clear_color(LABIRYNTHES[1][LABIRYNTHES[0]].couleur_fond)
+        dpg.configure_item("fond", texture_tag="texture_"+LABIRYNTHES[1][LABIRYNTHES[0]].fond)
+        dpg.configure_item("murs", texture_tag="texture_"+LABIRYNTHES[1][LABIRYNTHES[0]].murs)
+        dpg.configure_item("histoire_l", default_value="texture_"+LABIRYNTHES[1][LABIRYNTHES[0]].histoire)
 
     def interface():
         """charge toutes les interfaces"""
 
         def textures(): # Charges les textures nécéssaires
             with dpg.texture_registry(show=False):
-                for image in [COMPOSANTS[key].image for key in COMPOSANTS] + [labi.fond for labi in LABYRINTHES[1]] + [labi.murs for labi in LABYRINTHES[1]]:
+                for image in [COMPOSANTS[key].image for key in COMPOSANTS] + [labi.fond for labi in LABIRYNTHES[1]] + [labi.murs for labi in LABIRYNTHES[1]]:
                     width, height, channels, data = [elt for elt in dpg.load_image(os.path.join("data", image))]
                     dpg.add_static_texture(width=width, height=height, default_value=data, tag="texture_"+image)
                 
@@ -218,67 +216,60 @@ def main():
         def principale(): # Fenetre principale
             with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
                             no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
-                dpg.add_image("texture_"+LABYRINTHES[1][LABYRINTHES[0]].fond, tag="fond", pos=(0, 0), width=700, height=700)
-                dpg.add_image("texture_"+LABYRINTHES[1][LABYRINTHES[0]].murs, tag="murs", pos=(0, 0), width=700, height=700)
+                dpg.add_image("texture_"+LABIRYNTHES[1][LABIRYNTHES[0]].fond, tag="fond", pos=(0, 0), width=700, height=700)
+                dpg.add_image("texture_"+LABIRYNTHES[1][LABIRYNTHES[0]].murs, tag="murs", pos=(0, 0), width=700, height=700)
                 
                 for cle in COMPOSANTS:
-                    dpg.add_image("texture_"+COMPOSANTS[cle].image, tag=COMPOSANTS[cle].image, pos=[-500,-500], width=LABYRINTHES[1][LABYRINTHES[0]].taille_personnage, height=LABYRINTHES[1][LABYRINTHES[0]].taille_personnage, show=False)
+                    dpg.add_image("texture_"+COMPOSANTS[cle].image, tag=COMPOSANTS[cle].image, pos=[-500,-500], width=LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage, height=LABIRYNTHES[1][LABIRYNTHES[0]].taille_personnage, show=False)
 
         # Lance toutes les fonctions du GUI
         for fonction in [textures, compteur_puzzle, histoire, tuto, quitter, credits, principale]:
             fonction()
 
     ECRAN = [1280, 800]
+
+    # Charge les composants entrés dans le composants.json
     
-    COMPOSANTS = {
-        "personnage":       Composante("felix.png", True,"C'est vous, felix"),
-        "logo":             Composante("logo.png", False,"C'est le logo"),
-        "piece":            Composante("piece.png", True, "C'est une pièce de la carte, trouvez la"),
-        "portail_avant":    Composante("portail_avant.png", True, "C'est un portail, il vous emmenera a un autre niveau"),
-        "portail_arriere":  Composante("portail_arriere.png", False, "C'est un portail, il vous emmenera a un autre niveau"),
-        "fleches":          Composante("fleches.png", True, "Utilisez les flèches pour vous déplacer"),
-        "planete":          Composante("planete.png", False, "Vous avez fuit la planète maudite"),
-    }
+    data = json.load(open('data/composants.json'))
+    COMPOSANTS = dict()
+    for nom_composant in data:
+        COMPOSANTS[nom_composant] = Composante(data[nom_composant]["image"], data[nom_composant]["tutoriel"], data[nom_composant]["description"])
+    open('data/composants.json').close()
 
-    LABYRINTHES = [
-        0, 
-        [
-        labyrinthe("plaine", 40, (9, 74, 0),        {"personnage":[10, 20], "piece":[580, 520], "portail_avant":[210, 580], "portail_arriere":[70, 205]}, "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
-        labyrinthe("desert", 50, (219, 76, 33),     {"personnage":[60, 60], "piece":[320, 330], "portail_avant":[190, 600], "portail_arriere":[460, 600]}, "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe("nuages", 40, (122, 214, 235),   {"personnage":[365, 20], "piece":[330, 330], "portail_avant":[20, 360], "portail_arriere":[570, 520]}, "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
-        labyrinthe("lave",   30, (117, 1, 1),       {"personnage":[290, 70], "piece":[480, 70],  "portail_avant":[90, 240], "portail_arriere":[380, 570]}, "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
-        ]
-        ]
-
-    PUZZLE = [Puzzle("puzzle/puzzle1")][0]
+    # Charge les zones entrées dans le labirynthes.json
     
+    data = json.load(open('data/labirynthes/labirynthes.json'))
+    LABIRYNTHES = [0, []]
+    for i in data:
+        LABIRYNTHES[1].append(labyrinthe(i, data[i]["taille_personnage"], data[i]["couleur_fond"], data[i]["elements"], data[i]["histoire"]))
 
+    PUZZLE = Puzzle("puzzle/puzzle1")
 
     viewport_load()
     
     PIECE = {}
     interface()
-    labirynthe_i(LABYRINTHES[0])
+    labirynthe_i(LABIRYNTHES[0])
 
     # BOUCLE PRINCIPALE
 
     while dpg.is_dearpygui_running():
 
         if keyboard.is_pressed("down arrow"):
-            COMPOSANTS["personnage"].deplacer([0, LABYRINTHES[1][LABYRINTHES[0]].vitesse])
+            COMPOSANTS["personnage"].deplacer([0, LABIRYNTHES[1][LABIRYNTHES[0]].vitesse])
         if keyboard.is_pressed("up arrow"):
-            COMPOSANTS["personnage"].deplacer([0, -LABYRINTHES[1][LABYRINTHES[0]].vitesse])
+            COMPOSANTS["personnage"].deplacer([0, -LABIRYNTHES[1][LABIRYNTHES[0]].vitesse])
         if keyboard.is_pressed("left arrow"):
-            COMPOSANTS["personnage"].deplacer([-LABYRINTHES[1][LABYRINTHES[0]].vitesse, 0])
+            COMPOSANTS["personnage"].deplacer([-LABIRYNTHES[1][LABIRYNTHES[0]].vitesse, 0])
         if keyboard.is_pressed("right arrow"):
-            COMPOSANTS["personnage"].deplacer([LABYRINTHES[1][LABYRINTHES[0]].vitesse, 0])
+            COMPOSANTS["personnage"].deplacer([LABIRYNTHES[1][LABIRYNTHES[0]].vitesse, 0])
 
         dpg.configure_item("DEBUG_Y_perso", default_value=COMPOSANTS["personnage"].pos[1])
         dpg.configure_item("DEBUG_X_perso", default_value=COMPOSANTS["personnage"].pos[0])
         
         for composant in COMPOSANTS:
             
-            if composant != "personnage" and composant in LABYRINTHES[1][LABYRINTHES[0]].elements and est_proche(COMPOSANTS["personnage"].pos, COMPOSANTS[composant].pos):
+            if composant != "personnage" and composant in LABIRYNTHES[1][LABIRYNTHES[0]].elements and est_proche(COMPOSANTS["personnage"].pos, COMPOSANTS[composant].pos):
                 COMPOSANTS[composant].lancer(composant)
 
         dpg.render_dearpygui_frame()
