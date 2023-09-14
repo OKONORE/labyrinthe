@@ -13,16 +13,15 @@ def main():
         """
         Classe définissant un labirynthe
         """
-        def __init__(   self, nom, taille_personnage: float, pos_depart, couleur_fond: tuple[int, int, int], 
+        def __init__(   self, nom, taille_personnage: float, couleur_fond: tuple[int, int, int], 
                         elements: dict[tuple, tuple, tuple], histoire: str):
             self.nom = nom
-            self.fond = "labirynthes/" + nom + ".png"
-            self.murs = "fonds/" + nom + ".png"
+            self.fond = "labirynthes/fonds/" + nom + ".png"
+            self.murs = "labirynthes/murs/" + nom + ".png"
             self.murs_data = Image.open(os.path.join("data", self.murs))
             self.width, self.height = self.murs_data.size
             self.taille_personnage = taille_personnage
             self.vitesse = round(self.taille_personnage/15)
-            self.pos_depart = pos_depart
             self.couleur_fond = couleur_fond
             self.histoire = histoire
             self.elements = elements
@@ -33,18 +32,6 @@ def main():
             return self.murs_data.getpixel((
                 x + self.taille_personnage // 2, 
                 y + self.taille_personnage // 2))[3] > 200
-
-        def lancer(self, element):
-            """Lance l'action de l'element"""
-            if element == "PIECE":
-                PUZZLE.piece_trouvee()
-                LABYRINTHES[id_labyrinthe].elements[element] = None
-                dpg.configure_item("PIECE", show=False)
-
-            elif element == "PORTAIL_AVANT":
-                labirynthe_i(1)
-            elif element == "PORTAIL_ARRIERE":
-                labirynthe_i(-1)
                     
     class Puzzle:
         def __init__(self, path: str):
@@ -88,18 +75,19 @@ def main():
 
             if self.pieces_trouvees == self.pieces_totales:
                 with dpg.window(label="victoire", width=ECRAN[0], height=ECRAN[1], no_move=True, no_close=True, no_collapse=True, no_title_bar=True):
-                    dpg.add_image("planete")
-                dpg.configure_item("puzzle", show=True)
+                    dpg.add_image("texture_"+COMPOSANTS["planete"].image, tag="planete")
 
     class Composante:
-        def __init__(self, image):
+        def __init__(self, image: str, tutoriel: bool, desciption: str):
             self.image = image
             self.pos = [0, 0]
+            self.tutoriel = tutoriel
+            self.desciption = desciption
 
         def set_pos(self, position):
-            """Définie la position de Composant"""
+            """Définie la position du Composant"""
             self.pos = position
-            dpg.configure_item("texture_"+image, pos=self.pos)
+            dpg.set_item_pos(self.image, self.pos)
 
         def deplacer(self, mouvement):
             x, y = self.pos
@@ -108,6 +96,19 @@ def main():
                         max(min(y+y_2, 700-LABYRINTHES[id_labyrinthe].taille_personnage), 0)]
             if not LABYRINTHES[id_labyrinthe].est_mur(temp_pos) or dpg.get_value("DEBUG_FANTÔME"):
                 self.set_pos(temp_pos)
+
+        def lancer(self, element):
+            """Lance l'action de l'element"""
+            if element == "piece":
+                PUZZLE.piece_trouvee()
+                LABYRINTHES[id_labyrinthe].elements.pop(element)
+                dpg.configure_item("piece.png", show=False)
+
+            elif element == "portail_avant":
+                labirynthe_i(1)
+
+            elif element == "portail_arriere":
+                labirynthe_i(-1)
 
     def viewport_load():
         dpg.create_context()
@@ -128,28 +129,26 @@ def main():
         """change les interfaces pour faire apparraitre le labyrinthe i"""
         
         global id_labyrinthe
-        
-        for element in LABYRINTHES[id_labyrinthe].elements:
-            dpg.configure_item(element, show=False)
+        id_labyrinthe += i
 
+        for composant in COMPOSANTS:
+            if composant in LABYRINTHES[id_labyrinthe].elements:
+                COMPOSANTS[composant].set_pos(LABYRINTHES[id_labyrinthe].elements[composant])
+                dpg.configure_item(COMPOSANTS[composant].image, show=True, width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+            else:
+                dpg.configure_item(COMPOSANTS[composant].image, show=False)
 
-        for element in LABYRINTHES[id_labyrinthe].elements:
-            if not LABYRINTHES[id_labyrinthe].elements[element] is None:
-                dpg.configure_item(element, show=True, pos=LABYRINTHES[id_labyrinthe].elements[element], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-
-        PERSONNAGE.set_pos(LABYRINTHES[id_labyrinthe].pos_depart)
         dpg.set_viewport_clear_color(LABYRINTHES[id_labyrinthe].couleur_fond)
-        dpg.configure_item("Personnage", width=LABYRINTHES[id_labyrinthe].taille_personnage , height=LABYRINTHES[id_labyrinthe].taille_personnage)
-        dpg.configure_item("fond", texture_tag=LABYRINTHES[id_labyrinthe].fond)
-        dpg.configure_item("murs", texture_tag=LABYRINTHES[id_labyrinthe].murs)
-        dpg.configure_item("histoire_l", default_value=LABYRINTHES[id_labyrinthe].histoire)
+        dpg.configure_item("fond", texture_tag="texture_"+LABYRINTHES[id_labyrinthe].fond)
+        dpg.configure_item("murs", texture_tag="texture_"+LABYRINTHES[id_labyrinthe].murs)
+        dpg.configure_item("histoire_l", default_value="texture_"+LABYRINTHES[id_labyrinthe].histoire)
 
     def interface():
         """charge toutes les interfaces"""
 
         def textures(): # Charges les textures nécéssaires
             with dpg.texture_registry(show=False):
-                for image in [COMPOSANTES[key].image for key in COMPOSANTES] + [labi.fond for labi in LABYRINTHES] + [labi.murs for labi in LABYRINTHES]:
+                for image in [COMPOSANTS[key].image for key in COMPOSANTS] + [labi.fond for labi in LABYRINTHES] + [labi.murs for labi in LABYRINTHES]:
                     width, height, channels, data = [elt for elt in dpg.load_image(os.path.join("data", image))]
                     dpg.add_static_texture(width=width, height=height, default_value=data, tag="texture_"+image)
                 
@@ -184,7 +183,7 @@ def main():
         def histoire(): # Fenetre d'histoire
             with dpg.window(label="L'histoire du labirynthe Cosmique", tag="histoire", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True,
                             pos=(ECRAN[0]-530, ECRAN[1] - 790), width=500):
-                dpg.add_image("logo.png", pos=(100, 0), width=320, height=180)
+                dpg.add_image("texture_"+COMPOSANTS["logo"].image, pos=(100, 0), width=320, height=180)
                 dpg.add_text(tag="histoire_générale", wrap=500, pos=(5, 175), default_value="Un adorable petit chat nommé Personnage se réveille un jour pour découvrir qu'il s'est perdu dans l'immensité de l'univers. Se sentant seul et perdu, Personnage décide de partir à l'aventure pour retrouver son chemin vers sa maison. Pour cela Personnage doit rassembler les morceaux de la carte stellaire sur 4 mystérieuses planètes-labyrinthe. Mais de nombreux obstacles et pièges l'empécheront de rentrer chez lui. \n\n Êtes-vous suffisament malin pour aider Personnage à s'échapper des labyrinthes cosmiques ?")
 
             with dpg.window(tag="histoire_labi", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=False, no_title_bar=True,
@@ -195,9 +194,9 @@ def main():
             with dpg.window(tag="fenetre_tuto", no_close=True, no_collapse=True, show=True, no_move=True, no_resize=True, autosize=True, no_title_bar=True,
                             pos=(ECRAN[0]-530, ECRAN[1]-330), width=500):
                 with dpg.group(horizontal=True):
-                    for image, phrase in [("piece.png", "C'est une pièce de la carte, trouvez la"), ("portail_avant.png", "C'est un portail, il vous emmenera a un autre niveau") , ("felix.png", "C'est vous, felix"), ("fleches.png", "Utilisez les flèches pour vous déplacer")]:
+                    for image, phrase in [(COMPOSANTS[key].image, COMPOSANTS[key].desciption) for key in COMPOSANTS if COMPOSANTS[key].tutoriel]:
                         with dpg.group():
-                            dpg.add_image(image, tag=image+"_tuto", width=95, height=95)
+                            dpg.add_image("texture_"+image, tag=image+"_tuto", width=95, height=95)
                             dpg.add_text(wrap=80, default_value=phrase)
                         dpg.add_spacer(width=12)
                 
@@ -215,12 +214,11 @@ def main():
         def principale(): # Fenetre principale
             with dpg.window(tag="fenetre_principale", show=True, pos=(25, 75), autosize=True,
                             no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
-                dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
-                dpg.add_image(LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
-                dpg.add_image("texture_"+COMPOSANTES["personnage"].image, tag="Personnage", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_"+COMPOSANTES["piece"].image, tag="PIECE", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_"+COMPOSANTES["portail_avant"].image, tag="PORTAIL_AVANT", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_"+COMPOSANTES["portail_arriere"].image, tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+                dpg.add_image("texture_"+LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
+                dpg.add_image("texture_"+LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
+                
+                for cle in COMPOSANTS:
+                    dpg.add_image("texture_"+COMPOSANTS[cle].image, tag=COMPOSANTS[cle].image, pos=[-500,-500], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage, show=False)
 
         # Lance toutes les fonctions du GUI
         for fonction in [textures, compteur_puzzle, histoire, tuto, quitter, credits, principale]:
@@ -228,22 +226,22 @@ def main():
 
     ECRAN = [1280, 800]
     
-    COMPOSANTES = {
-        "personnage":       Composante("felix.png"),
-        "logo":             Composante("logo.png"),
-        "piece":            Composante("piece.png"),
-        "portail_avant":    Composante("portail_avant.png"),
-        "portail_arriere":  Composante("portail_arriere.png"),
-        "fleches":          Composante("fleches.png"),
-        "planete":          Composante("planete.png"),
+    COMPOSANTS = {
+        "personnage":       Composante("felix.png", True,"C'est vous, felix"),
+        "logo":             Composante("logo.png", False,"C'est le logo"),
+        "piece":            Composante("piece.png", True, "C'est une pièce de la carte, trouvez la"),
+        "portail_avant":    Composante("portail_avant.png", True, "C'est un portail, il vous emmenera a un autre niveau"),
+        "portail_arriere":  Composante("portail_arriere.png", False, "C'est un portail, il vous emmenera a un autre niveau"),
+        "fleches":          Composante("fleches.png", True, "Utilisez les flèches pour vous déplacer"),
+        "planete":          Composante("planete.png", False, "Vous avez fuit la planète maudite"),
     }
 
     LABYRINTHES = [
-        labyrinthe("plaine", 40, [10, 20],   (9, 74, 0),      {"piece":[580, 520], "portail_avant":[210, 580], "portail_arriere":[70, 205]}, "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
-        labyrinthe("desert", 50, [60, 60],   (219, 76, 33),   {"piece":[320, 330], "portail_avant":[190, 600], "portail_arriere":[460, 600]}, "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe("nuages", 40, [365, 20],  (122, 214, 235), {"piece":[330, 330], "portail_avant":[20, 360], "portail_arriere":[570, 520]}, "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
-        labyrinthe("lave",   30,   [290, 70],  (117, 1, 1),   {"piece":[480, 70],  "portail_avant":[90, 240], "portail_arriere":[380, 570]}, "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
-                ]
+        labyrinthe("plaine", 40, (9, 74, 0),        {"personnage":[10, 20], "piece":[580, 520], "portail_avant":[210, 580], "portail_arriere":[70, 205]}, "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
+        labyrinthe("desert", 50, (219, 76, 33),     {"personnage":[60, 60], "piece":[320, 330], "portail_avant":[190, 600], "portail_arriere":[460, 600]}, "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe("nuages", 40, (122, 214, 235),   {"personnage":[365, 20], "piece":[330, 330], "portail_avant":[20, 360], "portail_arriere":[570, 520]}, "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe("lave",   30, (117, 1, 1),       {"personnage":[290, 70], "piece":[480, 70],  "portail_avant":[90, 240], "portail_arriere":[380, 570]}, "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
+        ]
 
 
     
@@ -262,21 +260,21 @@ def main():
     while dpg.is_dearpygui_running():
 
         if keyboard.is_pressed("down arrow"):
-            PERSONNAGE.deplacer([0, LABYRINTHES[id_labyrinthe].vitesse])
+            COMPOSANTS["personnage"].deplacer([0, LABYRINTHES[id_labyrinthe].vitesse])
         if keyboard.is_pressed("up arrow"):
-            PERSONNAGE.deplacer([0, -LABYRINTHES[id_labyrinthe].vitesse])
+            COMPOSANTS["personnage"].deplacer([0, -LABYRINTHES[id_labyrinthe].vitesse])
         if keyboard.is_pressed("left arrow"):
-            PERSONNAGE.deplacer([-LABYRINTHES[id_labyrinthe].vitesse, 0])
+            COMPOSANTS["personnage"].deplacer([-LABYRINTHES[id_labyrinthe].vitesse, 0])
         if keyboard.is_pressed("right arrow"):
-            PERSONNAGE.deplacer([LABYRINTHES[id_labyrinthe].vitesse, 0])
+            COMPOSANTS["personnage"].deplacer([LABYRINTHES[id_labyrinthe].vitesse, 0])
 
-        dpg.configure_item("DEBUG_Y_perso", default_value=PERSONNAGE.pos[1])
-        dpg.configure_item("DEBUG_X_perso", default_value=PERSONNAGE.pos[0])
+        dpg.configure_item("DEBUG_Y_perso", default_value=COMPOSANTS["personnage"].pos[1])
+        dpg.configure_item("DEBUG_X_perso", default_value=COMPOSANTS["personnage"].pos[0])
         
-        for element in LABYRINTHES[id_labyrinthe].elements:
-            if not LABYRINTHES[id_labyrinthe].elements[element] is None:
-                if est_proche(PERSONNAGE.pos, LABYRINTHES[id_labyrinthe].elements[element]):
-                    LABYRINTHES[id_labyrinthe].lancer(element)
+        for composant in COMPOSANTS:
+            
+            if composant != "personnage" and composant in LABYRINTHES[id_labyrinthe].elements and est_proche(COMPOSANTS["personnage"].pos, COMPOSANTS[composant].pos):
+                COMPOSANTS[composant].lancer(composant)
 
         dpg.render_dearpygui_frame()
 
