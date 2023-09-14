@@ -51,7 +51,7 @@ def main():
             self.path = path
             self.image_actuelle = self.image_to_list()
             self.pieces_totales = sum([
-                element == "PIECE" 
+                element == "piece" 
                 for laby in LABYRINTHES 
                 for element in laby.elements])
             self.pieces_trouvees = 0
@@ -91,7 +91,7 @@ def main():
                     dpg.add_image("planete")
                 dpg.configure_item("puzzle", show=True)
 
-    class Compostante:
+    class Composante:
         def __init__(self, image):
             self.image = image
             self.pos = [0, 0]
@@ -149,7 +149,7 @@ def main():
 
         def textures(): # Charges les textures nécéssaires
             with dpg.texture_registry(show=False):
-                for image in [PERSONNAGE.image]+ [COMPOSANTES[key] for key in COMPOSANTES] + [labi.fond for labi in LABYRINTHES] +[labi.murs for labi in LABYRINTHES]:
+                for image in [COMPOSANTES[key].image for key in COMPOSANTES] + [labi.fond for labi in LABYRINTHES] + [labi.murs for labi in LABYRINTHES]:
                     width, height, channels, data = [elt for elt in dpg.load_image(os.path.join("data", image))]
                     dpg.add_static_texture(width=width, height=height, default_value=data, tag="texture_"+image)
                 
@@ -217,10 +217,10 @@ def main():
                             no_move=True, no_title_bar=True, no_scrollbar=True, no_background=True):
                 dpg.add_image(LABYRINTHES[id_labyrinthe].fond, tag="fond", pos=(0, 0), width=700, height=700)
                 dpg.add_image(LABYRINTHES[id_labyrinthe].murs, tag="murs", pos=(0, 0), width=700, height=700)
-                dpg.add_image("texture_felix.png", tag="Personnage", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_piece.png", tag="PIECE", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_portail_avant.png", tag="PORTAIL_AVANT", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
-                dpg.add_image("texture_portail_arriere.png", tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+                dpg.add_image("texture_"+COMPOSANTES["personnage"].image, tag="Personnage", pos=(0,0), width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+                dpg.add_image("texture_"+COMPOSANTES["piece"].image, tag="PIECE", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+                dpg.add_image("texture_"+COMPOSANTES["portail_avant"].image, tag="PORTAIL_AVANT", pos=[580, 520], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
+                dpg.add_image("texture_"+COMPOSANTES["portail_arriere"].image, tag="PORTAIL_ARRIERE", show=False, pos=[110, 120], width=LABYRINTHES[id_labyrinthe].taille_personnage, height=LABYRINTHES[id_labyrinthe].taille_personnage)
 
         # Lance toutes les fonctions du GUI
         for fonction in [textures, compteur_puzzle, histoire, tuto, quitter, credits, principale]:
@@ -228,23 +228,24 @@ def main():
 
     ECRAN = [1280, 800]
     
+    COMPOSANTES = {
+        "personnage":       Composante("felix.png"),
+        "logo":             Composante("logo.png"),
+        "piece":            Composante("piece.png"),
+        "portail_avant":    Composante("portail_avant.png"),
+        "portail_arriere":  Composante("portail_arriere.png"),
+        "fleches":          Composante("fleches.png"),
+        "planete":          Composante("planete.png"),
+    }
+
     LABYRINTHES = [
-        labyrinthe("plaine", 40, [10, 20],   (9, 74, 0),      {"PIECE":[580, 520], "PORTAIL_AVANT":[210, 580], "PORTAIL_ARRIERE":[70, 205]}, "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
-        labyrinthe("desert", 50, [60, 60],   (219, 76, 33),   {"PIECE":[320, 330], "PORTAIL_AVANT":[190, 600], "PORTAIL_ARRIERE":[460, 600]}, "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
-        labyrinthe("nuages", 40, [365, 20],  (122, 214, 235), {"PIECE":[330, 330], "PORTAIL_AVANT":[20, 360], "PORTAIL_ARRIERE":[570, 520]}, "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
-        labyrinthe("lave",   30,   [290, 70],  (117, 1, 1),     {"PIECE":[480, 70],  "PORTAIL_AVANT":[90, 240], "PORTAIL_ARRIERE":[380, 570]}, "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
+        labyrinthe("plaine", 40, [10, 20],   (9, 74, 0),      {"piece":[580, 520], "portail_avant":[210, 580], "portail_arriere":[70, 205]}, "La Planète Verdura est un endroit luxuriant et verdoyant, avec de grands arbres qui s'élèvent vers le ciel. Les chemins serpentent entre les racines entrelacées et les plantes exotiques. Le fragment de la carte stellaire se trouve au sommet d'une ancienne tour cachée au cœur de la forêt."),
+        labyrinthe("desert", 50, [60, 60],   (219, 76, 33),   {"piece":[320, 330], "portail_avant":[190, 600], "portail_arriere":[460, 600]}, "La Planète Sableon est un paysage aride et impitoyable, avec des dunes de sable à perte de vue et des tempêtes de sable occasionnelles. Le soleil brille intensément dans un ciel sans nuages. Le fragment de la carte stellaire est enfoui dans une ancienne pyramide perdue sous le sable. "), 
+        labyrinthe("nuages", 40, [365, 20],  (122, 214, 235), {"piece":[330, 330], "portail_avant":[20, 360], "portail_arriere":[570, 520]}, "La Planète Nimbroa est un monde céleste rempli de nuages moelleux et de paysages oniriques. Les nuages prennent des formes fantastiques et l' étoile brille aux couleurs charmantes. À première vue, elle peut paraître paisible et paradisiaque mais c'est en réalité une des planètes les plus dangereuses. Le fragment de la carte stellaire se cache, cette fois, au sommet d'une montagne de nuages majestueuse. "), 
+        labyrinthe("lave",   30,   [290, 70],  (117, 1, 1),   {"piece":[480, 70],  "portail_avant":[90, 240], "portail_arriere":[380, 570]}, "La Planète Mustafar est un monde tumultueux rempli de volcans en éruption et de rivières de lave brûlante. Des flammes dansent sur la surface, créant une lueur sinistre dans un ciel sombre. Le fragment de la carte stellaire se trouve dans un sanctuaire au cœur d'un volcan actif.  Mais Personnage devra d'abord traverser des plateformes instables, éviter toutes éruptions volcaniques et résister à la chaleur étouffante."),
                 ]
 
-    PERSONNAGE = Personnage("felix.png")
 
-    COMPOSANTES = {
-        "logo": "logo.png",
-        "piece":"piece.png",
-        "portail avant":"portail_avant.png",
-        "portail arriere":"portail_arriere.png",
-        "fleches":"fleches.png",
-        "planete":"planete.png",
-    }
     
     PUZZLE = [Puzzle("puzzle/puzzle1")][0]
     
