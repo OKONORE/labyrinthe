@@ -252,6 +252,12 @@ def main():
     labirynthe_i(LABIRYNTHES[0])
 
     # BOUCLE PRINCIPALE
+    TAILLES_ORIGINELLES = dict()
+
+    for item in dpg.get_all_items():
+        TAILLES_ORIGINELLES[item] = (dpg.get_item_width(item), dpg.get_item_height(item))
+    
+        
 
     while dpg.is_dearpygui_running():
 
