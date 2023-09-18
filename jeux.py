@@ -111,7 +111,7 @@ def main():
 
     def viewport_load():
         dpg.create_context()
-        dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=False, vsync=True, clear_color=(0, 0, 0))
+        dpg.create_viewport(title='Labirynthe', width=ECRAN[0], height=ECRAN[1], resizable=True, vsync=True, clear_color=(0, 0, 0))
         dpg.set_viewport_large_icon(os.path.join("data", "felix.png"))
         dpg.setup_dearpygui()
         dpg.show_viewport()
@@ -238,6 +238,12 @@ def main():
 
     # Charge les zones entrées dans le labirynthes.json
     
+    def update_responsive():
+        print(dpg.get_item_configuration(dpg.get_active_window()))
+        for item in dpg.get_item_children(dpg.get_active_window())
+            print(dpg.get_itm)
+
+
     data = json.load(open('data/labirynthes/labirynthes.json'))
     LABIRYNTHES = [0, []]
     for i in data:
@@ -251,12 +257,13 @@ def main():
     interface()
     labirynthe_i(LABIRYNTHES[0])
 
+    dpg.set_viewport_resize_callback(update_responsive)
+
     # BOUCLE PRINCIPALE
     TAILLES_ORIGINELLES = dict()
 
     for item in dpg.get_all_items():
         TAILLES_ORIGINELLES[item] = (dpg.get_item_width(item), dpg.get_item_height(item))
-    
         
 
     while dpg.is_dearpygui_running():
