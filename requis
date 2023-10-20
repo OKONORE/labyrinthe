@@ -1,3 +1,5 @@
 pip install --upgrade pip setuptools &&
 pip install dearpygui &&
 pip install keyboard
+
+# If your on linux, you need to execute in superuser, beacause of the Keyboard library
